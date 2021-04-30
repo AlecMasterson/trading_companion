@@ -1,0 +1,21 @@
+### IntelliJ IDEA ###
+.idea/
+*.iml
+
+# API Module
+**/application-secret.yml
+
+# Bin Module
+bin/**/__pycache__/
+bin/**/test*.py
+bin/data/**/*.csv
+bin/logs/*.log
+
+# Web Module
+**/node_modules
+**/coverage
+**/build
+
+# Miscellaneous
+**/target/
+**/.DS_STORE
