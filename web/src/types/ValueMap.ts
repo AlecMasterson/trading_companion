@@ -1,3 +1,1 @@
-export interface ValueMap<T> {
-    [key: string]: T;
-}
+export type ValueMap<T> = {[key: string]: T};

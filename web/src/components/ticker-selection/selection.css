@@ -1,0 +1,31 @@
+/* adjust padding of Card to allow items to reach edge of Card */
+#ticker-selection .MuiCardContent-root {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* force TextField to fill width */
+#ticker-selection .selection-form {
+    width: 100%;
+}
+
+/* limit list height and add scrollbar */
+#ticker-selection ul {
+    max-height: 300px;
+    overflow: auto;
+}
+
+/* adjust padding around TextField */
+#ticker-selection .MuiTextField-root {
+    padding: 0px 16px 8px 16px;
+}
+
+/* remove default outline when TextField is selected */
+#ticker-selection .MuiOutlinedInput-root input:focus:focus-visible {
+    outline: none !important;
+}
+
+/* separate the main content of the item from the secondary information */
+#ticker-selection .MuiListItemButton-root {
+    justify-content: space-between;
+}
