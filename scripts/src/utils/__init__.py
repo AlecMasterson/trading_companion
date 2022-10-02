@@ -1,13 +1,13 @@
 from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
-from sqlmodel import create_engine, Engine
+from sqlmodel import create_engine
 from typing import List
 import logging
 import os
 import sys
 import uuid
 
-def __create_database_engine() -> Engine:
+def __create_database_engine():
     """
     Function for creating an Engine object to establish a connection with the database.
     4 different environment variables are required for connecting to the database.
@@ -17,6 +17,7 @@ def __create_database_engine() -> Engine:
     """
     details: List[str] = list(map(os.environ.get, ["DB_USER", "DB_PASS", "DB_HOST", "DB_NAME"]))
     return create_engine(f"postgresql://{details[0]}:{details[1]}@{details[2]}/{details[3]}")
+
 
 def __create_logger() -> logging.Logger:
     """
@@ -52,5 +53,5 @@ def __create_logger() -> logging.Logger:
 
     return logger
 
-DATABASE: Engine = __create_database_engine()
+DATABASE = __create_database_engine()
 LOGGER: logging.Logger = __create_logger()

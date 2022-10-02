@@ -1,5 +1,58 @@
 ## Setup Raspberry Pi
 
+## Airflow
+
+```mermaid
+graph TD;
+    subgraph Available Data Sources
+        BINANCE
+        COINBASE
+    end
+
+    subgraph Binance API
+        /test
+    end
+
+    subgraph Coinbase API
+        /products
+    end
+
+    BINANCE --- /test
+    COINBASE --- /products
+
+    subgraph Daily Tasks
+        ticker_status
+        download>download tickers]
+        update>update tickers]
+    end
+
+    database
+
+    download --> ticker_status
+    ticker_status --> /test --> ticker_status
+    ticker_status --> /products --> ticker_status
+    ticker_status --> download --> update --> database
+```
+
+### Setup
+
+1. From the `airflow` directory, run the following command.
+```bash
+echo -e "AIRFLOW_UID=$(id -u)" > .env
+```
+
+2. In the `docker-compose.yml` file, validate that the `AIRFLOW__CORE__LOAD_EXAMPLES` variable is set to `false`.
+
+### Launching
+From the `airflow` directory, run the following command.
+```bash
+docker-compose up
+```
+
+## Database Setup
+
+The database is containerized using *Docker*. The specific service within the `docker-compose` configuration is called `service-db`. This service intitializes and maintains a *Postgres* database with persistant data storage contained in the `database/data` directory.
+
 ## Setup MYSQL
 
 ### Connect to MYSQL

@@ -2,8 +2,8 @@ import React from 'react';
 import {Container, Grid, Tab, Tabs} from '@mui/material';
 import {createTheme, Theme, ThemeProvider} from '@mui/material/styles';
 import darkScrollbar from '@mui/material/darkScrollbar';
+import {SnackbarProvider} from 'notistack';
 import MarketView from './components/MarketView';
-import Positions from './components/Positions';
 import './app.css';
 
 const DarkTheme: Theme = createTheme({
@@ -29,18 +29,20 @@ export default function App (): React.ReactElement {
 
     return (
         <ThemeProvider theme={DarkTheme}>
-            <Container>
-                <Grid item>
-                    <Tabs className='main-tabs' centered={true} onChange={onTabChange} value={tab}>
-                        <Tab label='Market View' />
-                        <Tab label='Positions' />
-                        <Tab label='Model Analysis' />
-                    </Tabs>
-                </Grid>
+            <SnackbarProvider>
+                <Container>
+                    <Grid item>
+                        <Tabs className='main-tabs' centered={true} onChange={onTabChange} value={tab}>
+                            <Tab label='Market View' />
+                            <Tab label='Positions' />
+                            <Tab label='Model Analysis' />
+                            <Tab label='Admin Portal' />
+                        </Tabs>
+                    </Grid>
 
-                {tab === 0 && <MarketView />}
-                {tab === 1 && <Positions />}
-            </Container>
+                    {tab === 0 && <MarketView />}
+                </Container>
+            </SnackbarProvider>
         </ThemeProvider>
     );
 }

@@ -1,0 +1,38 @@
+version: '3.8'
+services:
+  web:
+    image: node:18.3.0
+    container_name: web
+    stdin_open: true
+    tty: true
+    ports:
+      - '3000:3005'
+    volumes:
+      - ./web:/web
+  scripts:
+    image: scripts_test:0.0.3
+    container_name: scripts
+    env_file:
+      - .env
+    volumes:
+      - ./scripts/logs:/scripts/logs
+  service-db:
+    image: postgres:14.2
+    container_name: database
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - '5555:5432'
+    volumes:
+      - ./database/data:/var/lib/postresql/data
+  splunk:
+    image: splunk/splunk:latest
+    container_name: splunk
+    environment:
+      - SPLUNK_START_ARGS=--accept-license
+      - SPLUNK_PASSWORD=splunk1234
+    ports:
+      - 8000
+    volumes:
+      - ./scripts/logs:/scripts/logs

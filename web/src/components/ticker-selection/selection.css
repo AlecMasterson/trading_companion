@@ -1,3 +1,8 @@
+#ticker-selection {
+    max-width: '275px';
+    min-width: '275px';
+}
+
 /* adjust padding of Card to allow items to reach edge of Card */
 #ticker-selection .MuiCardContent-root {
     padding-left: 0 !important;

@@ -1,0 +1,1 @@
+* * * * * python /scripts/src/download_ticker_history.py COINBASE BTC-USD

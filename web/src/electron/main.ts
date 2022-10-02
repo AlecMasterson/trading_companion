@@ -6,11 +6,11 @@ import * as URL from 'url';
 WINDOW FUNCTIONS
 */
 
-function create_window(): BrowserWindow {
+export function create_window(): BrowserWindow {
     return new BrowserWindow({
+        autoHideMenuBar: true,
         center: true,
         minHeight: 600,
-        autoHideMenuBar: true,
         minWidth: 800,
         show: false,
         title: 'Trading Companion'
@@ -26,7 +26,7 @@ function get_app_url(): string {
         });
     }
 
-    return 'http://localhost:3000';
+    return 'http://localhost:60167';
 }
 
 function on_window_show(window: BrowserWindow): void {

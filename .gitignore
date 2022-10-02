@@ -2,20 +2,29 @@
 .idea/
 *.iml
 
+# Python
+**/__pycache__
+**/logs/**/*.log
+scripts/**/*.csv
+scripts/logs/dag_id=*/
+scripts/logs/dag_processor_manager/
+scripts/logs/scheduler/
+
 # API Module
 **/application-secret.yml
 
 # Bin Module
-bin/**/__pycache__/
 bin/**/test*.py
-bin/data/**/*.csv
 bin/logs/*.log
 
 # Web Module
-**/node_modules
-**/coverage
 **/build
+**/coverage
+**/dist
+**/node_modules
+**/out
 
 # Miscellaneous
 **/target/
 **/.DS_STORE
+**/.env
