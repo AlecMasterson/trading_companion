@@ -1,30 +1,33 @@
-from typing import Any, List, Optional
+from typing import Any
 from utils import LOGGER
 import requests
 
-HEADERS_DEFAULT = {"Accept": "application/json"}
-
-def get(url: str) -> Optional[List[Any]]:
+def get(url: str, headers: dict = {}, params: dict = {}) -> Any:
     """
-    Function for making HTTP GET requests with proper error handling.
-    An exception is thrown if an HTTP error occurs during API call.
+    Function for making an HTTP GET request with proper error handling.
+    An exception is thrown if an error occurs or the returned HTTP status is not OK.
 
-    Parameters:
-        - url [str] - the URL to make the HTTP request against
+    Parameters
+    ----------
+    url : str
+        The URL to make the HTTP request against.
+    headers : dict
+        Dictionary (optional) containing header information for the HTTP request.
+    params : dict
+        Dictionary (optional) containing query parameter information for the HTTP request.
 
-    Returns:
-        Optional[List[Any]] - deserialized JSON response from request
+    Returns
+    -------
+    Any - A deserialized JSON response.
     """
     try:
-        LOGGER.info(f"[HTTP-GET] - {url}")
-        response: requests.Response = requests.get(url, headers=HEADERS_DEFAULT)
+        LOGGER.info(f"[HTTP] - url={url}, headers={headers}, params={params}")
+        response: requests.Response = requests.get(url, headers=headers, params=params)
 
         # Return the JSON deserialized response ONLY if the HTTP status was okay.
         if response.status_code == requests.codes.ok:
             return response.json()
 
-        LOGGER.error(f"<HTTP: {response.status_code}> {response.reason}")
+        raise Exception(f"<{response.status_code}> - {response.reason}")
     except Exception as e:
-        LOGGER.error(e)
-
-    return None
+        raise Exception(f"[HTTP] - Failed to GET, {e}")
