@@ -31,6 +31,7 @@
         "indent": ["error", 4],
         "linebreak-style": ["error", "unix"],
         "quotes": ["error", "single"],
+        "react/no-children-prop": "off",
         "semi": ["error", "always"]
     }
 }

@@ -2,6 +2,7 @@ from typing import Any
 from utils import LOGGER
 import requests
 
+
 def get(url: str, headers: dict = {}, params: dict = {}) -> Any:
     """
     Function for making an HTTP GET request with proper error handling.

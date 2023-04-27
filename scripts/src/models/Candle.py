@@ -1,10 +1,13 @@
 from dataclasses import dataclass
+from enums.Granularity import Granularity
+from enums.Source import Source
+
 
 @dataclass
 class Candle:
-    data_source: str
+    data_source: Source
     ticker: str
-    granularity: int
+    granularity: Granularity
     candle_timestamp: int
     interpolated: bool
     price_close: float

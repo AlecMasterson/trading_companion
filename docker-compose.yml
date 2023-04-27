@@ -10,12 +10,14 @@ services:
     volumes:
       - ./web:/web
   scripts:
-    image: scripts_test:0.0.3
+    image: scripts:1.0.6
     container_name: scripts
     env_file:
       - .env
+    ports:
+      - "8000:8000"
     volumes:
-      - ./scripts/logs:/scripts/logs
+      - ./scripts:/scripts
   service-db:
     image: postgres:14.2
     container_name: database

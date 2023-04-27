@@ -1,4 +1,7 @@
-```sh
-docker build . --tag airflow_extended:latest
-docker run --name scripts-development --rm -itd --mount type=bind,source="$(pwd)",target=/scripts --env-file .env script-dev
-```
+## Docker Build
+
+`docker build . --tag scripts:1.0.0`
+
+## Docker Compose
+
+`docker compose run --rm -itd scripts`

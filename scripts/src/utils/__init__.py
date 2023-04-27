@@ -1,31 +1,41 @@
 from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
-from sqlmodel import create_engine
-from typing import List
+# from sqlmodel import create_engine
 import logging
 import os
 import sys
 import uuid
 
-def __create_database_engine():
-    """
-    Function for creating an Engine object to establish a connection with the database.
-    4 different environment variables are required for connecting to the database.
 
-    Returns:
-        Engine - the sqlmodel engine object
+try:
+    __CONFIG = {
+        "DB_HOST": os.environ["DB_HOST"],
+        "DB_NAME": os.environ["DB_NAME"],
+        "DB_PASS": os.environ["DB_PASS"],
+        "DB_USER": os.environ["DB_USER"]
+    }
+except:
+    raise Exception("Environment Variables Missing, Please Check Requirements in README")
+
+
+def __create_database_engine() -> None:
     """
-    details: List[str] = list(map(os.environ.get, ["DB_USER", "DB_PASS", "DB_HOST", "DB_NAME"]))
-    return create_engine(f"postgresql://{details[0]}:{details[1]}@{details[2]}/{details[3]}")
+    Function for creating an sqlmodel Engine object to establish a connection with the database.
+
+    Returns
+    -------
+    Engine - the sqlmodel Engine object
+    """
+    return None # create_engine(f"postgresql://{__CONFIG['DB_USER']}:{__CONFIG['DB_PASS']}@{__CONFIG['DB_HOST']}/{__CONFIG['DB_NAME']}")
 
 
 def __create_logger() -> logging.Logger:
     """
-    Function for creating a logger to be used across the application.
-    The logger will write to the console and to a file (1 file per day).
+    Function for creating a logger object to be used across the application.
 
-    Returns:
-        logging.Logger - the logger object
+    Returns
+    -------
+    logging.Logger - the logger object
     """
     logger = logging.getLogger("main")
     logger.setLevel(logging.DEBUG)
@@ -53,5 +63,6 @@ def __create_logger() -> logging.Logger:
 
     return logger
 
-DATABASE = __create_database_engine()
+
+DATABASE: None = __create_database_engine()
 LOGGER: logging.Logger = __create_logger()

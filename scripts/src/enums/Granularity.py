@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class Granularity(Enum):
 
     MINUTE_1 = "MINUTE_1"

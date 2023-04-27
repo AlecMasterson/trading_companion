@@ -1,32 +1,52 @@
-from abc import ABC, abstractmethod
+from abc import ABC, abstractproperty, abstractstaticmethod
 from enums.Granularity import Granularity
+from enums.Source import Source
 from models.Candle import Candle
 from models.Ticker import Ticker
 from typing import List
 
+
 class SourceBase(ABC):
 
-    @abstractmethod
-    def get_tickers() -> List[Ticker]:
-        """
-        Function for downloading the available tickers for the given source.
 
-        Returns:
-            List[Ticker] - a list of Ticker objects representing the available tickers for the given source
+    @abstractproperty
+    def _SOURCE(self) -> Source:
+        """
+        Unique identifier for the class, associating it with the Source enum.
         """
         raise NotImplementedError
 
 
-    @abstractmethod
-    def download_ticker_history(self, ticker: str, granularity: Granularity) -> List[Candle]:
+    @abstractstaticmethod
+    def get_tickers() -> List[Ticker]:
         """
-        Function for downloading the history of a given ticker at the given granularity from the given source.
+        Function for downloading the available tickers for the given source.
 
-        Parameters:
-            - ticker [str] - ticker to download history for
-            - granularity [Granularity] - time granularity of the candles
+        Returns
+        -------
+        List[Ticker] - a list of Ticker objects representing the available tickers for the given source
+        """
+        raise NotImplementedError
 
-        Returns:
-            List[Candle] - a list of Candle objects representing the queried data
+
+    @abstractstaticmethod
+    def get_ticker_history(self, ticker: str, granularity: Granularity, startDateTime: str, endDateTime: str) -> List[Candle]:
+        """
+        Function for downloading the desired history of a given ticker at the given granularity for the given source.
+
+        Parameters
+        ----------
+        ticker : str
+            Ticker to download history for.
+        granularity : Granularity
+            Time granularity of the candles.
+        startDateTime : str
+            Start of the timeframe in which the candles will be within.
+        endDateTime : str
+            End (exclusive) of the timeframe in which the candles will be within.
+
+        Returns
+        -------
+        List[Candle] - a list of Candle objects representing the queried data
         """
         raise NotImplementedError
