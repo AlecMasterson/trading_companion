@@ -4,8 +4,8 @@
     "func_S": "S1",
     "func_Y": "Y1",
     "model": {
-        "batch_size": 100,
-        "epochs": 2000
+        "batch_size": 32,
+        "epochs": 500
     },
     "ta": [
         {
