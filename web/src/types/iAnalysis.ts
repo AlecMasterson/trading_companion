@@ -64,6 +64,16 @@ export const AnalysisConfigMap: {[key in (Indicator | LearnedModel)]: iAnalysisC
     [Indicator.RSI]: {
         dataKey: Indicator.RSI,
         offset: true,
+        plotLines: [
+            {
+                dashStyle: 'LongDash',
+                value: 30
+            },
+            {
+                dashStyle: 'LongDash',
+                value: 70
+            }
+        ],
         series: {
             name: Indicator.RSI,
             type: 'line'

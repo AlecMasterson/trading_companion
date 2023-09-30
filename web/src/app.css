@@ -9,6 +9,18 @@ body {
     height: 100vh;
 }
 
+.MuiContainer-root {
+    display: flex !important;
+    flex-direction: column !important;
+}
+
 .main-tabs {
     margin-bottom: 2rem;
+}
+
+#test {
+    padding-bottom: 16px;
+}
+
+#test > div {
 }

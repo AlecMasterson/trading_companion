@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-from typing import Any, List
+from dataclasses import dataclass, field
+from typing import Any, List, Optional
 
 
 @dataclass
@@ -9,7 +9,6 @@ class TAConfig:
     func: str
     name: str
 
-
 @dataclass
 class ModelConfig:
     candle_data: List[str]
@@ -17,4 +16,5 @@ class ModelConfig:
     func_S: str
     func_Y: str
     model: dict[str, Any]
-    ta: List[TAConfig]
+    model_inputs: Optional[List[str]] = field(default_factory=list)
+    ta: Optional[List[TAConfig]] = field(default_factory=list)

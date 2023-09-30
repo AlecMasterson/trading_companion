@@ -1,0 +1,84 @@
+{
+    "candle_data": ["price_close", "price_high", "price_low", "price_open", "volume"],
+    "func_M": "M2",
+    "func_S": "S1",
+    "func_Y": "Y3",
+    "model": {
+        "batch_size": 32,
+        "epochs": 1000
+    },
+    "model_inputs": [
+        "chance_increasing_v1"
+    ],
+    "ta": [
+        {
+            "candle_data": ["price_close"],
+            "config": {
+                "window": 3
+            },
+            "func": "ema",
+            "name": "EMA_3"
+        },
+        {
+            "candle_data": ["price_close"],
+            "config": {
+                "window": 9
+            },
+            "func": "ema",
+            "name": "EMA_9"
+        },
+        {
+            "candle_data": ["price_close"],
+            "config": {
+                "window": 26
+            },
+            "func": "ema",
+            "name": "EMA_26"
+        },
+        {
+            "candle_data": ["price_close"],
+            "config": {
+                "window_fast": 9,
+                "window_slow": 26
+            },
+            "func": "ema_diff",
+            "name": "EMA_DIFF"
+        },
+        {
+            "candle_data": ["price_close"],
+            "config": {
+                "window_fast": 12,
+                "window_slow": 26
+            },
+            "func": "macd",
+            "name": "MACD"
+        },
+        {
+            "candle_data": ["price_close"],
+            "config": {
+                "window_fast": 12,
+                "window_sign": 9,
+                "window_slow": 26
+            },
+            "func": "macd_diff",
+            "name": "MACD_DIFF"
+        },
+        {
+            "candle_data": ["price_close"],
+            "config": {
+                "window": 14
+            },
+            "func": "rsi",
+            "name": "RSI"
+        },
+        {
+            "candle_data": ["price_high", "price_low", "price_close"],
+            "config": {
+                "smooth_window": 3,
+                "window": 14
+            },
+            "func": "stoch",
+            "name": "STOCH"
+        }
+    ]
+}

@@ -6,10 +6,11 @@ import {AnalysisConfigMap, iAnalysis, iAnalysisData} from '../types/iAnalysis';
 import {iCandle} from '../types/iCandle';
 import TimeUtil from '../utils/TimeUtil';
 
-const COLOR_AXIS = '#D8D8D8';
+const COLOR_AXIS = '#787878';
 const COLOR_BACKGROUND = '#4E4868';
 const COLOR_CANDLESTICK_GREEN = '#00CC66';
 const COLOR_CANDLESTICK_RED = '#FF3333';
+const COLOR_LABEL = '#D8D8D8';
 
 function getAnalysisData(analysis: iAnalysis): Array<Array<number>> {
     return analysis.data.map((x: iAnalysisData): number[] => [
@@ -30,11 +31,70 @@ function getCandlestickData(candles: iCandle[]): Array<Array<number>> {
 
 interface AnalysisChartProps {
     candles: iCandle[];
-    selected: iAnalysis;
-    selectedOffset: iAnalysis;
+    selected: iAnalysis | null;
+    selectedOffset: iAnalysis | null;
 }
 
 export default function AnalysisChart(props: AnalysisChartProps): React.ReactElement {
+    const series: any[] = [
+        {
+            data: getCandlestickData(props.candles),
+            name: 'candles',
+            type: 'candlestick'
+        }
+    ];
+
+    const yAxis: any[] = [
+        {
+            crosshair: {
+                dashStyle: 'LongDash'
+            },
+            gridLineColor: COLOR_AXIS,
+            labels: {
+                style: {
+                    color: COLOR_LABEL
+                }
+            },
+            title: {
+                enabled: false
+            }
+        }
+    ];
+
+    if (props.selected) {
+        series.push({
+            ...AnalysisConfigMap[props.selected.type].series,
+            data: getAnalysisData(props.selected)
+        });
+
+        yAxis[0].plotLines = AnalysisConfigMap[props.selected.type].plotLines || [];
+    }
+
+    if (props.selectedOffset) {
+        series.push({
+            ...AnalysisConfigMap[props.selectedOffset.type].series,
+            data: getAnalysisData(props.selectedOffset),
+            yAxis: 1
+        });
+
+        yAxis[0].height = '70%';
+        yAxis.push({
+            gridLineWidth: 0,
+            height: '30%',
+            labels: {
+                offset: 0,
+                style: {
+                    color: COLOR_LABEL
+                }
+            },
+            plotLines: AnalysisConfigMap[props.selectedOffset.type].plotLines || [],
+            title: {
+                enabled: false
+            },
+            top: '70%'
+        });
+    }
+
     return (
         <HighchartsReact
             containerProps={{
@@ -61,8 +121,8 @@ export default function AnalysisChart(props: AnalysisChartProps): React.ReactEle
                     enabled: true
                 },
                 plotOptions: {
-                    ...(AnalysisConfigMap[props.selected.type].plotOptions || {}),
-                    ...(AnalysisConfigMap[props.selectedOffset.type].plotOptions || {}),
+                    ...(props.selected ? AnalysisConfigMap[props.selected.type].plotOptions ?? {} : {}),
+                    ...(props.selectedOffset ? AnalysisConfigMap[props.selectedOffset.type].plotOptions ?? {} : {}),
                     candlestick: {
                         color: COLOR_CANDLESTICK_RED,
                         lineColor: COLOR_CANDLESTICK_RED,
@@ -83,22 +143,7 @@ export default function AnalysisChart(props: AnalysisChartProps): React.ReactEle
                         }
                     }
                 },
-                series: [
-                    {
-                        data: getCandlestickData(props.candles),
-                        name: 'candles',
-                        type: 'candlestick'
-                    },
-                    {
-                        ...AnalysisConfigMap[props.selected.type].series,
-                        data: getAnalysisData(props.selected)
-                    },
-                    {
-                        ...AnalysisConfigMap[props.selectedOffset.type].series,
-                        data: getAnalysisData(props.selectedOffset),
-                        yAxis: 1
-                    }
-                ],
+                series,
                 title: null,
                 tooltip: {
                     enabled: false
@@ -113,42 +158,11 @@ export default function AnalysisChart(props: AnalysisChartProps): React.ReactEle
                     labels: {
                         formatter: (x: {value: number}): string => TimeUtil.timestampToDateString(x.value),
                         style: {
-                            color: COLOR_AXIS
+                            color: COLOR_LABEL
                         }
                     }
                 },
-                yAxis: [
-                    {
-                        crosshair: {
-                            dashStyle: 'LongDash'
-                        },
-                        gridLineColor: COLOR_AXIS,
-                        height: '70%',
-                        labels: {
-                            style: {
-                                color: COLOR_AXIS
-                            }
-                        },
-                        plotLines: AnalysisConfigMap[props.selected.type].plotLines || [],
-                        title: {
-                            enabled: false
-                        }
-                    },
-                    {
-                        height: '30%',
-                        labels: {
-                            offset: 0,
-                            style: {
-                                color: COLOR_AXIS
-                            }
-                        },
-                        plotLines: AnalysisConfigMap[props.selectedOffset.type].plotLines || [],
-                        title: {
-                            enabled: false
-                        },
-                        top: '70%'
-                    }
-                ]
+                yAxis
             }}
         />
     );

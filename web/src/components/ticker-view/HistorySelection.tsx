@@ -13,9 +13,9 @@ import {
 import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
 import {DateTimePicker} from '@mui/x-date-pickers/DateTimePicker';
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
-import {Granularity} from '../types/Granularity';
-import {iTickerHistoryRequest} from '../types/iTickerHistoryRequest';
-import {Source} from '../types/Source';
+import {Granularity} from '../../types/enums/Granularity';
+import {iTickerHistoryRequest} from '../../types/iTickerHistoryRequest';
+import {Source} from '../../types/enums/Source';
 
 const FORMAT_DATE = 'YYYY-MM-DD HH:mm:ss';
 

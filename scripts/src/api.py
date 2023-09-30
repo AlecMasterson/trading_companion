@@ -1,4 +1,4 @@
-from analysis.ML import fit_model, get_indicator
+# from analysis.ML import fit_model, get_indicators
 from enums.Source import Source
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -37,18 +37,18 @@ App.add_middleware(
 )
 
 
-@RouterAnalysis.post("/indicator")
+@RouterAnalysis.post("/indicators")
 async def analysis_indicator(request: IndicatorRequest) -> List[dict]:
-    LOGGER.info(f"indicator={request.indicator}, candles.size={len(request.candles)}")
+    LOGGER.info(f"candles.size={len(request.candles)}")
 
-    return get_indicator(request.indicator, request.candles)
+    return [] # get_indicators(request.candles)
 
 
 @RouterAnalysis.post("/model")
 async def analysis_get(request: ModelRequest) -> List[dict]:
     LOGGER.info(f"model={request.model}, candles.size={len(request.candles)}")
 
-    return fit_model(request.model, request.candles)
+    return [] # fit_model(request.model, request.candles)
 
 
 @RouterTicker.get("/all")

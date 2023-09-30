@@ -2,7 +2,6 @@ from argparse import ArgumentParser
 from enums.Granularity import Granularity
 from enums.Source import Source
 from models.Candle import Candle
-from models.Ticker import Ticker
 from sources.Coinbase import Coinbase
 from typing import List
 from utils import LOGGER
@@ -14,7 +13,7 @@ SOURCE_MAP = {
 }
 
 def export(source: Source, granularity: Granularity, ticker: str, history: List[Candle]) -> None:
-    path = f"data/{source.name}/{granularity.name}"
+    path = f"data/history/{source.name}/{granularity.name}"
     os.makedirs(path, exist_ok=True)
 
     pandas.DataFrame(history).to_csv(f"{path}/{ticker}.csv", index=False)
@@ -23,12 +22,9 @@ def export(source: Source, granularity: Granularity, ticker: str, history: List[
 def main(source: Source, granularity: Granularity) -> None:
     LOGGER.info(f"source: {source}, granularity: {granularity}")
 
-    tickers: List[Ticker] = SOURCE_MAP[source].get_tickers()
-    LOGGER.info(f"{len(tickers)} Tickers Found")
-
-    for ticker in tickers:
-        history: List[Candle] = SOURCE_MAP[source].download_ticker_history(ticker.id, granularity)
-        export(source, granularity, ticker.id, history)
+    ticker: str = "ADA-USD"
+    history: List[Candle] = SOURCE_MAP[source].get_ticker_history(ticker, granularity, "2020-01-01 00:00:00", "2023-04-01 00:00:00")
+    export(source, granularity, ticker, history)
 
 
 if __name__ == "__main__":

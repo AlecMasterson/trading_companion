@@ -1,39 +1,46 @@
-import {sortBy} from 'lodash';
-import {iTickerData} from '../types/iTickerData';
-import {iTickerSummary} from '../types/iTickerSummary';
-import {Granularity} from '../types/Granularity';
-import Data from './data.json';
+import axios, {AxiosResponse} from 'axios';
+import {iCandle} from '../types/iCandle';
+import {iAnalysisData} from '../types/iAnalysis';
+import {iTicker} from '../types/iTicker';
+import {LearnedModel} from '../types/enums/LearnedModel';
+import {Source} from '../types/enums/Source';
 
-const TickerSummary: iTickerSummary[] = [
-    {currentPrice: 54323.12432, name: 'BTC', source: 'Coinbase'},
-    {currentPrice: 54331.6533, name: 'BTC', source: 'Binance'},
-    {currentPrice: 3211.9324, name: 'ETH', source: 'Binance'},
-    {currentPrice: 792.744445, name: 'APPL', source: 'ETrade'},
-    {currentPrice: 4222.653, name: 'TES', source: 'ETrade'},
-    {currentPrice: 92.32211, name: 'UDX', source: 'Binance'}
-];
+
+const URL = 'http://localhost:8000';
 
 export default class AppApi {
 
-    public static async getTickerData(ticker: string): Promise<iTickerData | null> {
-        return {
-            candles: sortBy(JSON.parse(Data), 'candle_timestamp'),
-            forecasts: {},
-            granularity: Granularity.DAY_1,
-            ticker
-        };
+    public static async getAnalysisIndicators(candles: iCandle[]): Promise<Array<iAnalysisData>> {
+        const response: AxiosResponse = await axios.post(URL + '/api/analysis/indicators', {candles});
+        return response.data;
     }
 
-    public static async getTickerSummary(): Promise<iTickerSummary[]> {
-        return TickerSummary;
+    public static async getAnalysisLearnedModel(model: LearnedModel, candles: iCandle[]): Promise<Array<iAnalysisData>> {
+        const response: AxiosResponse = await axios.post(URL + '/api/analysis/model', {model, candles});
+        return response.data;
     }
 
-    public static async getTechIndicators(): Promise<string[]> {
-        return [];
+    public static async getTickerHistory(source: string, ticker: string, granularity: string, startDateTime: string, endDateTime: string): Promise<Array<iCandle>> {
+        const payload: object = {source, ticker, granularity, startDateTime, endDateTime};
+        const response: AxiosResponse = await axios.post(URL + '/api/ticker/history', payload);
+
+        return response.data;
     }
 
-    public static async getIndicatorData(indicator: string, candles: iTickerData[], options?: object): Promise<number[]> {
-        console.log(indicator, candles, options);
-        return [];
+    public static async getTickers(source: Source): Promise<Array<iTicker>> {
+        const tickers: any = await axios.get(`http://localhost:8000/tickers?source=${source}`);
+        return tickers.data;
     }
+    /*
+
+    protected static async post(url: string, payload: any): Promise<any> {
+        try {
+            const response: AxiosResponse = await axios.post(url, payload);
+            response.su
+
+        } catch (exception: unknown) {
+
+        }
+    }
+    */
 }

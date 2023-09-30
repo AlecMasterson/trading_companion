@@ -3,7 +3,7 @@ import {Container, Grid, Tab, Tabs} from '@mui/material';
 import {createTheme, Theme, ThemeProvider} from '@mui/material/styles';
 import darkScrollbar from '@mui/material/darkScrollbar';
 import {SnackbarProvider} from 'notistack';
-import MarketView from './components/MarketView';
+import TickerHistory from './components/ticker-view/TickerHistory';
 import './app.css';
 
 const DarkTheme: Theme = createTheme({
@@ -21,7 +21,7 @@ const DarkTheme: Theme = createTheme({
 });
 
 export default function App (): React.ReactElement {
-    const [tab, setTab] = React.useState<number>(0);
+    const [tab, setTab] = React.useState<number>(1);
 
     function onTabChange(_: React.SyntheticEvent, newTab: number): void {
         setTab(newTab);
@@ -34,13 +34,14 @@ export default function App (): React.ReactElement {
                     <Grid item>
                         <Tabs className='main-tabs' centered={true} onChange={onTabChange} value={tab}>
                             <Tab label='Market View' />
+                            <Tab label='Ticker History' />
                             <Tab label='Positions' />
                             <Tab label='Model Analysis' />
                             <Tab label='Admin Portal' />
                         </Tabs>
                     </Grid>
 
-                    {tab === 0 && <MarketView />}
+                    {tab === 1 && <TickerHistory />}
                 </Container>
             </SnackbarProvider>
         </ThemeProvider>

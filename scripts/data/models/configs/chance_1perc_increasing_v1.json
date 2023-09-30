@@ -1,0 +1,72 @@
+{
+    "candle_data": ["price_close", "price_high", "price_low", "volume"],
+    "func_M": "M1",
+    "func_S": "S1",
+    "func_Y": "Y2",
+    "model": {
+        "batch_size": 32,
+        "epochs": 500
+    },
+    "ta": [
+        {
+            "candle_data": ["price_high", "price_low", "price_close"],
+            "config": {
+                "window": 14
+            },
+            "func": "adx",
+            "name": "ADX"
+        },
+        {
+            "candle_data": ["price_close"],
+            "config": {
+                "window": 12
+            },
+            "func": "ema",
+            "name": "EMA_12"
+        },
+        {
+            "candle_data": ["price_close"],
+            "config": {
+                "window": 26
+            },
+            "func": "ema",
+            "name": "EMA_26"
+        },
+        {
+            "candle_data": ["price_close"],
+            "config": {
+                "window_fast": 12,
+                "window_slow": 26
+            },
+            "func": "macd",
+            "name": "MACD"
+        },
+        {
+            "candle_data": ["price_close"],
+            "config": {
+                "window_fast": 12,
+                "window_sign": 9,
+                "window_slow": 26
+            },
+            "func": "macd_diff",
+            "name": "MACD_DIFF"
+        },
+        {
+            "candle_data": ["price_close"],
+            "config": {
+                "window": 14
+            },
+            "func": "rsi",
+            "name": "RSI"
+        },
+        {
+            "candle_data": ["price_high", "price_low", "price_close"],
+            "config": {
+                "smooth_window": 3,
+                "window": 14
+            },
+            "func": "stoch",
+            "name": "STOCH"
+        }
+    ]
+}

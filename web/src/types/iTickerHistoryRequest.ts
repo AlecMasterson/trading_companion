@@ -1,5 +1,5 @@
-import {Granularity} from './Granularity';
-import {Source} from './Source';
+import {Granularity} from './enums/Granularity';
+import {Source} from './enums/Source';
 
 export interface iTickerHistoryRequest {
     endDateTime: string;
