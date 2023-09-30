@@ -6,9 +6,9 @@
 **/__pycache__
 **/logs/**/*.log
 scripts/**/*.csv
-scripts/logs/dag_id=*/
-scripts/logs/dag_processor_manager/
-scripts/logs/scheduler/
+bin/logs/dag_id=*/
+bin/logs/dag_processor_manager/
+bin/logs/scheduler/
 
 # API Module
 **/application-secret.yml
