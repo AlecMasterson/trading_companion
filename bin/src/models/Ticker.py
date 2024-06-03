@@ -3,7 +3,10 @@ from dataclasses import dataclass
 
 @dataclass
 class Ticker:
-    id: str
-    label: str
-    currencyAlt: str
-    currencyBase: str
+    active: bool
+    exchange: str
+    market_cap: str
+    name: str
+    ticker: str
+    type: str
+    valid: bool
