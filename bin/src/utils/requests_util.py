@@ -25,7 +25,7 @@ def exchange(url: str, method: str, headers: dict = {}, params: dict = {}) -> An
     """
     try:
         LOGGER.info(f"[HTTP] - [{method}] - url={url}, headers={headers}, params={params}")
-        response: requests.Response = requests.request(url, headers=headers, method=method, params=params)
+        response: requests.Response = requests.request(method, url, headers=headers, params=params)
 
         # Return the deserialized JSON response if the HTTP status was okay.
         if response.status_code == requests.codes.ok:
