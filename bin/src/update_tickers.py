@@ -4,14 +4,7 @@ from psycopg import Connection, Cursor
 from typing import List
 from utils import LOGGER
 from utils.decorators import database_connection
-from utils.polygon import get_tickers
-import os
-
-os.environ["POLYGON_KEY"] = "yVhJ0Ync8LiK1p3iR2bEGJ9jZB1Rkdv53lgmQO"
-os.environ["POSTGRES_DB"] = "trading_companion"
-os.environ["POSTGRES_PASSWORD"] = "password123"
-os.environ["POSTGRES_PORT"] = "5499"
-os.environ["POSTGRES_USER"] = "ep_senex"
+from utils.polygon import get_ticker_market_cap, get_tickers
 
 
 __SQL_INSERT = """
@@ -27,11 +20,7 @@ active = EXCLUDED.active,
 valid = EXCLUDED.valid;
 """
 
-SQL_SELECT_TICKERS = """
-SELECT ticker FROM stocks.ticker
-"""
-
-SQL_UPDATE_MARKET_CAP = """
+__SQL_UPDATE_MARKET_CAP = """
 UPDATE stocks.ticker
 SET market_cap = %(market_cap)s
 WHERE ticker = %(ticker)s;
@@ -46,6 +35,13 @@ def main(database_conn: Connection = None) -> None:
     cursor: Cursor = database_conn.cursor()
     cursor.executemany(__SQL_INSERT, [asdict(i) for i in tickers])
     database_conn.commit()
+
+    for ticker in tickers:
+        market_cap: float = get_ticker_market_cap(ticker.ticker)
+        LOGGER.info(f"ticker={ticker.ticker}, market_cap={market_cap}")
+
+        database_conn.execute(__SQL_UPDATE_MARKET_CAP, {"market_cap": market_cap, "ticker": ticker.ticker})
+        database_conn.commit()
 
 
 if __name__ == "__main__":
