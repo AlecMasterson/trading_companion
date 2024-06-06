@@ -9,30 +9,32 @@ import os
 
 __ENDPOINT_HISTORY: str = "https://api.polygon.io/v2/aggs/ticker/{ticker}/range/1/day/{start}/{end}?adjusted=true"
 __ENDPOINT_TICKERS: str = "https://api.polygon.io/v3/reference/tickers"
+__KEYS: List[str] = os.environ["POLYGON_KEYS"]
 
 
-@rate_limit(limit=5, sec=60)
+@rate_limit(limit=(len(__KEYS) * 5), sec=60)
 def __get(url: str, headers: dict = {}, params: dict = {}) -> Any:
     return exchange(url, "GET", headers=headers, params=params)
 
 
 def get_results(base_url: str, headers: dict = {}, params: dict = {}) -> Generator[Union[dict, List[dict]], None, None]:
-    apiKey: str = os.environ["POLYGON_KEY"]
+    key_index: int = 0
     temp_params: dict = {
         **params,
-        "apiKey": apiKey
+        "apiKey": __KEYS[key_index]
     }
 
     url: Optional[str] = f"{base_url}"
     while url is not None:
         if "cursor" in url:
             temp_params = {}
-            url = f"{url}&apiKey={apiKey}"
+            url = f"{url}&apiKey={__KEYS[key_index]}"
 
         response: dict = __get(url, headers=headers, params=temp_params)
         if response["status"] != "OK":
             raise Exception(f"[POLYGON] - Status not OK - {response['status']}")
 
+        key_index = 0 if key_index == len(__KEYS) - 1 else key_index + 1
         url = response["next_url"] if "next_url" in response else None
         yield response["results"]
 
