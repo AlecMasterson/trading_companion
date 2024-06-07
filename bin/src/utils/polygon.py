@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from enums.Granularity import Granularity
 from models.Candle import Candle
 from models.Ticker import Ticker
@@ -9,7 +10,7 @@ import os
 
 __ENDPOINT_HISTORY: str = "https://api.polygon.io/v2/aggs/ticker/{ticker}/range/1/day/{start}/{end}?adjusted=true"
 __ENDPOINT_TICKERS: str = "https://api.polygon.io/v3/reference/tickers"
-__KEYS: List[str] = os.environ["POLYGON_KEYS"]
+__KEYS: List[str] = os.environ["POLYGON_KEYS"].split(",")
 
 
 @rate_limit(limit=(len(__KEYS) * 5), sec=60)
@@ -39,18 +40,20 @@ def get_results(base_url: str, headers: dict = {}, params: dict = {}) -> Generat
         yield response["results"]
 
 
-def get_history(ticker: str, granularity: Granularity, start_date: str, end_date: str) -> List[Candle]:
+def get_history(ticker: str, granularity: str, start_date: str, end_date: str) -> List[Candle]:
     url: str = __ENDPOINT_HISTORY.replace("{ticker}", ticker).replace("{start}", start_date).replace("{end}", end_date)
 
     def to_candle(entry: dict) -> Candle:
+        timestamp = datetime.fromtimestamp(entry["t"] / 1000, tz=timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+
         return Candle(
+            close=entry["c"],
             granularity=granularity,
-            price_close=entry["c"],
-            price_high=entry["h"],
-            price_low=entry["l"],
-            price_open=entry["o"],
+            high=entry["h"],
+            low=entry["l"],
+            open=entry["o"],
             ticker=ticker,
-            timestamp=entry["t"],
+            timestamp=timestamp,
             volume=entry["v"]
         )
 

@@ -9,5 +9,5 @@ class Candle:
     low: float
     open: float
     ticker: str
-    timestamp: int
+    timestamp: str
     volume: float
