@@ -4,9 +4,12 @@ from models.Candle import Candle
 from psycopg import Connection, Cursor
 from typing import List
 from utils import LOGGER
+from utils.date_util import get_time_et, to_string
 from utils.decorators import database_connection
 from utils.polygon import get_history
 
+
+__START_DATE: str = "2020-01-01"
 
 __SQL_INSERT = """
 INSERT INTO stocks.history
@@ -20,14 +23,19 @@ close = EXCLUDED.close,
 volume = EXCLUDED.volume;
 """
 
+__SQL_SELECT_HISTORY = """
+SELECT ticker, timestamp FROM stocks.history
+WHERE ticker = %(ticker)s AND granularity = %(granularity)s;
+"""
+
 __SQL_SELECT_TICKERS = """
-select ticker from stocks.ticker where active = true;
+SELECT ticker FROM stocks.ticker WHERE active = true;
 """
 
 
 @database_connection
 def main(database_conn: Connection = None) -> None:
-    end_date: str = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+    end_date: str = to_string(get_time_et(add_days=-1))
     LOGGER.info(f"end_date={end_date}")
 
     tickers: List[tuple] = database_conn.execute(__SQL_SELECT_TICKERS).fetchall()
@@ -36,7 +44,13 @@ def main(database_conn: Connection = None) -> None:
 
     cursor: Cursor = database_conn.cursor()
     for ticker in tickers:
-        history: List[Candle] = get_history(ticker, "DAY", "2020-01-01", end_date)
+        candles: List[tuple] = cursor.execute(__SQL_SELECT_HISTORY, {"ticker": ticker, "granularity": "DAY"}).fetchall()
+        candles: List[tuple] = sorted(candles, key=lambda candle: candle[1], reverse=True)
+        if len(candles) > 0 and to_string(candles[0][1]) == end_date:
+            print(f"ticker={ticker}, DB Already Up-To-Date, Skipping")
+            continue
+
+        history: List[Candle] = get_history(ticker, "DAY", __START_DATE, end_date)
         LOGGER.info(f"ticker={ticker}, history.length={len(history)}")
 
         cursor.executemany(__SQL_INSERT, [asdict(i) for i in history])
