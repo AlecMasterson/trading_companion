@@ -39,7 +39,7 @@ def get_results(base_url: str, headers: dict = {}, params: dict = {}) -> Generat
             raise Exception(f"[POLYGON] - Status not OK - {response['status']}")
 
         url = response["next_url"] if "next_url" in response else None
-        yield response["results"]
+        yield response["results"] if "results" in response else []
 
 
 def get_history(ticker: str, granularity: str, start_date: str, end_date: str) -> List[Candle]:
