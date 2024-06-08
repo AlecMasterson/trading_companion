@@ -1,7 +1,6 @@
-from datetime import datetime, timezone
-from enums.Granularity import Granularity
 from models.Candle import Candle
 from models.Ticker import Ticker
+from utils.date_util import to_iso_8601
 from utils.decorators import rate_limit
 from utils.requests_util import exchange
 from typing import Any, Generator, List, Optional, Union
@@ -44,8 +43,6 @@ def get_history(ticker: str, granularity: str, start_date: str, end_date: str) -
     url: str = __ENDPOINT_HISTORY.replace("{ticker}", ticker).replace("{start}", start_date).replace("{end}", end_date)
 
     def to_candle(entry: dict) -> Candle:
-        timestamp = datetime.fromtimestamp(entry["t"] / 1000, tz=timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
-
         return Candle(
             close=entry["c"],
             granularity=granularity,
@@ -53,7 +50,7 @@ def get_history(ticker: str, granularity: str, start_date: str, end_date: str) -
             low=entry["l"],
             open=entry["o"],
             ticker=ticker,
-            timestamp=timestamp,
+            timestamp=to_iso_8601(entry["t"]),
             volume=entry["v"]
         )
 

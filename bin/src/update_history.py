@@ -1,5 +1,4 @@
 from dataclasses import asdict
-from datetime import datetime, timedelta
 from models.Candle import Candle
 from psycopg import Connection, Cursor
 from typing import List
@@ -35,7 +34,7 @@ SELECT ticker FROM stocks.ticker WHERE active = true;
 
 @database_connection
 def main(database_conn: Connection = None) -> None:
-    end_date: str = to_string(get_time_et(add_days=-1))
+    end_date: str = to_string(get_time_et(offset_days=-1))
     LOGGER.info(f"end_date={end_date}")
 
     tickers: List[tuple] = database_conn.execute(__SQL_SELECT_TICKERS).fetchall()
