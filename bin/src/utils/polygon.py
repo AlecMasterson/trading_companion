@@ -11,30 +11,33 @@ __ENDPOINT_HISTORY: str = "https://api.polygon.io/v2/aggs/ticker/{ticker}/range/
 __ENDPOINT_TICKERS: str = "https://api.polygon.io/v3/reference/tickers"
 __KEYS: List[str] = os.environ["POLYGON_KEYS"].split(",")
 
+KEY_INDEX: int = 0
+
 
 @rate_limit(limit=(len(__KEYS) * 5), sec=60)
 def __get(url: str, headers: dict = {}, params: dict = {}) -> Any:
-    return exchange(url, "GET", headers=headers, params=params)
+    global KEY_INDEX
+
+    temp_params: dict = {**params}
+    temp_url: str = f"{url}"
+
+    if "cursor" in temp_url:
+        temp_params = {}
+        temp_url += f"apiKey={__KEYS[KEY_INDEX]}"
+    else:
+        temp_params["apiKey"] = __KEYS[KEY_INDEX]
+
+    KEY_INDEX = 0 if KEY_INDEX == len(__KEYS) - 1 else KEY_INDEX + 1
+    return exchange(temp_url, "GET", headers=headers, params=temp_params)
 
 
 def get_results(base_url: str, headers: dict = {}, params: dict = {}) -> Generator[Union[dict, List[dict]], None, None]:
-    key_index: int = 0
-    temp_params: dict = {
-        **params,
-        "apiKey": __KEYS[key_index]
-    }
-
     url: Optional[str] = f"{base_url}"
     while url is not None:
-        if "cursor" in url:
-            temp_params = {}
-            url = f"{url}&apiKey={__KEYS[key_index]}"
-
-        response: dict = __get(url, headers=headers, params=temp_params)
+        response: dict = __get(url, headers=headers, params=params)
         if response["status"] != "OK":
             raise Exception(f"[POLYGON] - Status not OK - {response['status']}")
 
-        key_index = 0 if key_index == len(__KEYS) - 1 else key_index + 1
         url = response["next_url"] if "next_url" in response else None
         yield response["results"]
 
