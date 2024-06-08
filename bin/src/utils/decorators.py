@@ -1,4 +1,23 @@
+import os
+import psycopg
 import time
+
+
+def database_connection(func):
+    def wrapper(*args, **kwargs):
+        database: str = os.environ["POSTGRES_DB"]
+        host: str = os.environ["POSTGRES_HOST"]
+        password: str = os.environ["POSTGRES_PASSWORD"]
+        port: str = os.environ["POSTGRES_PORT"]
+        username: str = os.environ["POSTGRES_USER"]
+
+        connection_string: str = f"dbname='{database}' user='{username}' host='{host}' port='{port}' password='{password}'"
+
+        with psycopg.connect(connection_string) as connection:
+            kwargs["database_conn"] = connection
+            return func(*args, **kwargs)
+
+    return wrapper
 
 
 def rate_limit(limit: int = 10, sec: int = 60):
