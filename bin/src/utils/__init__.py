@@ -1,32 +1,8 @@
 from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
-# from sqlmodel import create_engine
 import logging
-import os
 import sys
 import uuid
-
-
-try:
-    __CONFIG = {
-        "DB_HOST": os.environ["DB_HOST"],
-        "DB_NAME": os.environ["DB_NAME"],
-        "DB_PASS": os.environ["DB_PASS"],
-        "DB_USER": os.environ["DB_USER"]
-    }
-except:
-    raise Exception("Environment Variables Missing, Please Check Requirements in README")
-
-
-def __create_database_engine() -> None:
-    """
-    Function for creating an sqlmodel Engine object to establish a connection with the database.
-
-    Returns
-    -------
-    Engine - the sqlmodel Engine object
-    """
-    return None # create_engine(f"postgresql://{__CONFIG['DB_USER']}:{__CONFIG['DB_PASS']}@{__CONFIG['DB_HOST']}/{__CONFIG['DB_NAME']}")
 
 
 def __create_logger() -> logging.Logger:
@@ -64,5 +40,4 @@ def __create_logger() -> logging.Logger:
     return logger
 
 
-DATABASE: None = __create_database_engine()
 LOGGER: logging.Logger = __create_logger()
