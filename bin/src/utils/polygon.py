@@ -1,7 +1,7 @@
 from models.Candle import Candle
 from models.Ticker import Ticker
 from utils.date_util import to_iso_8601
-from utils.decorators import rate_limit
+from utils.decorators import rate_limit, retry
 from utils.requests_util import exchange
 from typing import Any, Generator, List, Optional, Union
 import os
@@ -14,6 +14,7 @@ __KEYS: List[str] = os.environ["POLYGON_KEYS"].split(",")
 KEY_INDEX: int = 0
 
 
+@retry(delay=60)
 @rate_limit(limit=(len(__KEYS) * 5), sec=60)
 def __get(url: str, headers: dict = {}, params: dict = {}) -> Any:
     global KEY_INDEX
