@@ -22,5 +22,22 @@ services:
     tty: true
     volumes:
       - ./bin:/app
+  splunk:
+    image: splunk/splunk:latest
+    container_name: splunk
+    env_file:
+      - .env
+    environment:
+      SPLUNK_ADD: "monitor /app/logs"
+      SPLUNK_START_ARGS: "--accept-license"
+    ports:
+      - '8000:8000'
+      - '8089:8089'
+    volumes:
+      - ./bin/logs:/app/logs
+      - splunk-conf:/opt/splunk/etc
+      - splunk-data:/opt/splunk/var
 volumes:
   postgres-data:
+  splunk-conf:
+  splunk-data:
