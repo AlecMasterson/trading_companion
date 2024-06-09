@@ -17,7 +17,7 @@ def __create_logger() -> logging.Logger:
     logger.setLevel(logging.DEBUG)
 
     fileName = f"./logs/{datetime.now().strftime('%Y-%m-%d')}.log"
-    fileFormatter = logging.Formatter("[%(asctime)s] - [%(levelname)s] - [" + str(uuid.uuid4()) + "] - [%(module)s] - [%(funcName)s] - %(message)s")
+    fileFormatter = logging.Formatter("[%(asctime)s] - level=[%(levelname)s] - trace=[" + str(uuid.uuid4()) + "] - module=[%(module)s] - func=[%(funcName)s] - %(message)s")
 
     fileHandler = TimedRotatingFileHandler(fileName, when="d", interval=1,  backupCount=5)
     fileHandler.setLevel(logging.INFO)
