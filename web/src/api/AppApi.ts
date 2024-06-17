@@ -1,46 +1,42 @@
-import axios, {AxiosResponse} from 'axios';
+import axios, {AxiosResponse, Method} from 'axios';
 import {iCandle} from '../types/iCandle';
-import {iAnalysisData} from '../types/iAnalysis';
 import {iTicker} from '../types/iTicker';
-import {LearnedModel} from '../types/enums/LearnedModel';
-import {Source} from '../types/enums/Source';
-
-
-const URL = 'http://localhost:8000';
+import {Granularity} from '../types/enums/Granularity';
+import {Indicator} from '../types/enums/Indicator';
 
 export default class AppApi {
+    public static async getHistory(ticker: string, granularity: Granularity): Promise<iCandle[]> {
+        const payload: object = {
+            end_date: '2024-01-01',
+            granularity: granularity.toUpperCase(),
+            start_date: '2023-01-01',
+            ticker
+        };
 
-    public static async getAnalysisIndicators(candles: iCandle[]): Promise<Array<iAnalysisData>> {
-        const response: AxiosResponse = await axios.post(URL + '/api/analysis/indicators', {candles});
-        return response.data;
+        return AppApi.request('POST', 'http://localhost:8081/api/history', {}, payload);
     }
 
-    public static async getAnalysisLearnedModel(model: LearnedModel, candles: iCandle[]): Promise<Array<iAnalysisData>> {
-        const response: AxiosResponse = await axios.post(URL + '/api/analysis/model', {model, candles});
-        return response.data;
+    public static async getIndicator(indicator: Indicator, data: iCandle[]): Promise<any[]> {
+        const payload: object = {
+            data,
+            indicator
+        };
+
+        return AppApi.request('POST', 'http://localhost:8081/api/indicator', {}, payload);
     }
 
-    public static async getTickerHistory(source: string, ticker: string, granularity: string, startDateTime: string, endDateTime: string): Promise<Array<iCandle>> {
-        const payload: object = {source, ticker, granularity, startDateTime, endDateTime};
-        const response: AxiosResponse = await axios.post(URL + '/api/ticker/history', payload);
-
-        return response.data;
+    public static async getTickers(): Promise<iTicker[]> {
+        return AppApi.request('GET', 'http://localhost:8081/api/tickers');
     }
 
-    public static async getTickers(source: Source): Promise<Array<iTicker>> {
-        const tickers: any = await axios.get(`http://localhost:8000/tickers?source=${source}`);
-        return tickers.data;
-    }
-    /*
+    private static async request(method: Method, url: string, params: object = {}, payload: any = undefined): Promise<any> {
+        await new Promise((resolve: (_: unknown) => void): number => setTimeout(resolve, 1500));
 
-    protected static async post(url: string, payload: any): Promise<any> {
-        try {
-            const response: AxiosResponse = await axios.post(url, payload);
-            response.su
-
-        } catch (exception: unknown) {
-
+        const response: AxiosResponse = await axios.request({data: payload, method, params, url});
+        if (response.status >= 400) {
+            throw new Error(`[HTTP] - <${response.status}> - ${response.statusText}`);
         }
+
+        return response.data;
     }
-    */
 }

@@ -1,49 +1,45 @@
 import React from 'react';
-import {Container, Grid, Tab, Tabs} from '@mui/material';
+import {Box, CssBaseline} from '@mui/material';
+import Grid from '@mui/material/Unstable_Grid2';
 import {createTheme, Theme, ThemeProvider} from '@mui/material/styles';
 import darkScrollbar from '@mui/material/darkScrollbar';
 import {SnackbarProvider} from 'notistack';
-import TickerHistory from './components/ticker-view/TickerHistory';
+import NavBar from './NavBar';
+import TickerView from './components/TickerView';
 import './app.css';
 
 const DarkTheme: Theme = createTheme({
-    components: {
-        MuiCssBaseline: {
-            styleOverrides: {body: darkScrollbar()}
-        }
-    },
-    palette: {
-        background: {default: '#201D39', paper: '#4E4868'},
-        mode: 'dark',
-        primary: {main: '#00C899'},
-        secondary: {main: '#F4ECFF'}
+  components: {
+    MuiCssBaseline: {
+      styleOverrides: {body: darkScrollbar()}
     }
+  },
+  palette: {
+    // background: {default: '#201D39', paper: '#4E4868'},
+    background: {default: '#161A25', paper: '#161A25'},
+    mode: 'dark',
+    primary: {main: '#00C899'},
+    // primary: {main: '#3C63FE'},
+    secondary: {main: '#F4ECFF'}
+  }
 });
 
-export default function App (): React.ReactElement {
-    const [tab, setTab] = React.useState<number>(1);
+export default function App(): React.ReactElement {
+  return (
+    <ThemeProvider theme={DarkTheme}>
+      <CssBaseline />
 
-    function onTabChange(_: React.SyntheticEvent, newTab: number): void {
-        setTab(newTab);
-    }
+      <SnackbarProvider>
+        <NavBar />
 
-    return (
-        <ThemeProvider theme={DarkTheme}>
-            <SnackbarProvider>
-                <Container>
-                    <Grid item>
-                        <Tabs className='main-tabs' centered={true} onChange={onTabChange} value={tab}>
-                            <Tab label='Market View' />
-                            <Tab label='Ticker History' />
-                            <Tab label='Positions' />
-                            <Tab label='Model Analysis' />
-                            <Tab label='Admin Portal' />
-                        </Tabs>
-                    </Grid>
-
-                    {tab === 1 && <TickerHistory />}
-                </Container>
-            </SnackbarProvider>
-        </ThemeProvider>
-    );
+        <Box sx={{m: 2}}>
+          <Grid container spacing={2}>
+            <Grid xs={10} xsOffset={1}>
+              <TickerView />
+            </Grid>
+          </Grid>
+        </Box>
+      </SnackbarProvider>
+    </ThemeProvider>
+  );
 }

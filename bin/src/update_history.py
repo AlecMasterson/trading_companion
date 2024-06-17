@@ -1,60 +1,56 @@
 from dataclasses import asdict
+from datetime import datetime, timedelta
+from enums.Granularity import Granularity
 from models.Candle import Candle
-from psycopg import Connection, Cursor
+from sqlalchemy import create_engine
+from sqlalchemy.dialects.postgresql import insert as db_insert
+from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.sql import Executable
 from typing import List
 from utils import LOGGER
-from utils.date_util import get_time_et, to_string
-from utils.decorators import database_connection
-from utils.polygon import get_history
+from utils.date_util import get_now, to_string
+from utils.polygon import get_ticker_candle_history
+import json
+import os
 
 
-__START_DATE: str = "2020-01-01"
-
-__SQL_INSERT = """
-INSERT INTO stocks.history
-(ticker, timestamp, granularity, high, low, open, close, volume)
-VALUES (%(ticker)s, %(timestamp)s, %(granularity)s, %(high)s, %(low)s, %(open)s, %(close)s, %(volume)s)
-ON CONFLICT (ticker, timestamp, granularity) DO UPDATE SET
-high = EXCLUDED.high,
-low = EXCLUDED.low,
-open = EXCLUDED.open,
-close = EXCLUDED.close,
-volume = EXCLUDED.volume;
-"""
-
-__SQL_SELECT_HISTORY = """
-SELECT ticker, timestamp FROM stocks.history
-WHERE ticker = %(ticker)s AND granularity = %(granularity)s;
-"""
-
-__SQL_SELECT_TICKERS = """
-SELECT ticker FROM stocks.ticker WHERE active = true;
-"""
-
-
-@database_connection
-def main(database_conn: Connection = None) -> None:
-    end_date: str = to_string(get_time_et(offset_days=-1))
-    LOGGER.info(f"end_date={end_date}")
-
-    tickers: List[tuple] = database_conn.execute(__SQL_SELECT_TICKERS).fetchall()
-    tickers: List[str] = [ticker[0] for ticker in tickers]
-    LOGGER.info(f"tickers.length={len(tickers)}")
-
-    cursor: Cursor = database_conn.cursor()
-    for ticker in tickers:
-        candles: List[tuple] = cursor.execute(__SQL_SELECT_HISTORY, {"ticker": ticker, "granularity": "DAY"}).fetchall()
-        candles: List[tuple] = sorted(candles, key=lambda candle: candle[1], reverse=True)
-        if len(candles) > 0 and to_string(candles[0][1]) == end_date:
-            print(f"ticker={ticker}, DB Already Up-To-Date, Skipping")
-            continue
-
-        history: List[Candle] = get_history(ticker, "DAY", __START_DATE, end_date)
-        LOGGER.info(f"ticker={ticker}, history.length={len(history)}")
-
-        cursor.executemany(__SQL_INSERT, [asdict(i) for i in history])
-        database_conn.commit()
+engine = create_engine(f"postgresql://{os.environ['DB_USERNAME']}:{os.environ['DB_PASSWORD']}@{os.environ['DB_HOST']}:5432/trading_companion")
+SessionLocal = sessionmaker(bind=engine)
+database_session: Session = SessionLocal()
 
 
 if __name__ == "__main__":
-    main()
+    today: datetime = get_now()
+    start_date: str = to_string(today - timedelta(days=10), format="%Y-%m-%d")
+    end_date: str = to_string(today, format="%Y-%m-%d")
+    LOGGER.info(f"start_date={start_date} end_date={end_date}")
+
+    with open("./data/s&p500.json", "r") as file:
+        tickers: List[str] = json.load(file)
+
+    failed: List[str] = []
+    for ticker in tickers:
+        try:
+            candles_hour: List[Candle] = get_ticker_candle_history(ticker, Granularity.HOUR, start_date, end_date)
+            LOGGER.info(f"ticker={ticker} candles_hour={len(candles_hour)}")
+
+            if len(candles_hour) > 0:
+                statement: Executable = db_insert(Candle).values([asdict(candle) for candle in candles_hour]).on_conflict_do_nothing()
+                database_session.execute(statement)
+                database_session.commit()
+
+            candles_day: List[Candle] = get_ticker_candle_history(ticker, Granularity.DAY, start_date, end_date)
+            LOGGER.info(f"ticker={ticker} candles_day={len(candles_day)}")
+
+            if len(candles_day) > 0:
+                statement: Executable = db_insert(Candle).values([asdict(candle) for candle in candles_day]).on_conflict_do_nothing()
+                database_session.execute(statement)
+                database_session.commit()
+
+            LOGGER.info(f"ticker={ticker} success=true")
+        except:
+            LOGGER.exception(f"ticker={ticker} success=false")
+            failed.append(ticker)
+
+    if len(failed) > 0:
+        raise Exception(f"failed={failed}")

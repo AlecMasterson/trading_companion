@@ -1,0 +1,25 @@
+DROP SCHEMA public CASCADE;
+CREATE SCHEMA market_data;
+
+GRANT CONNECT ON DATABASE trading_companion TO PUBLIC;
+GRANT USAGE ON SCHEMA market_data TO PUBLIC;
+ALTER DEFAULT PRIVILEGES IN SCHEMA market_data GRANT SELECT ON TABLES to PUBLIC;
+
+CREATE USER ep_senex_r WITH PASSWORD 'password123';
+
+CREATE TABLE market_data.candles (
+	created_at TIMESTAMPTZ NOT NULL,
+	"close" NUMERIC NOT NULL,
+	granularity VARCHAR(20) NOT NULL,
+	high NUMERIC NOT NULL,
+	low NUMERIC NOT NULL,
+	"open" NUMERIC NOT NULL,
+	ticker VARCHAR(20) NOT NULL,
+	"timestamp" TIMESTAMPTZ NOT NULL,
+	updated_at TIMESTAMPTZ NOT NULL,
+	volume NUMERIC NOT NULL,
+	CONSTRAINT history_pk PRIMARY KEY (granularity, ticker, "timestamp")
+);
+
+CREATE USER ep_senex WITH PASSWORD 'superspecialproductionpassword123';
+GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE ON ALL TABLES IN SCHEMA market_data TO ep_senex;

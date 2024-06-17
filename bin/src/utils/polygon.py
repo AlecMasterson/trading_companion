@@ -1,104 +1,77 @@
+from enums.Granularity import Granularity
 from models.Candle import Candle
-from models.Ticker import Ticker
-from utils.date_util import to_iso_8601
-from utils.decorators import rate_limit, retry
+from models.PolygonResponse import PolygonCandle, PolygonResponse
+from utils.date_util import from_timestamp
+from utils.decorators import RateLimit
 from utils.requests_util import exchange
-from typing import Any, Generator, List, Optional, Union
+from typing import Any, Generator, List, Optional
 import os
 
 
-__ENDPOINT_HISTORY: str = "https://api.polygon.io/v2/aggs/ticker/{ticker}/range/1/day/{start}/{end}?adjusted=true"
-__ENDPOINT_TICKERS: str = "https://api.polygon.io/v3/reference/tickers"
+__ENDPOINT_TICKER_CANDLE_HISTORY: str = "https://api.polygon.io/v2/aggs/ticker/{ticker}/range/1/{granularity}/{start_date}/{end_date}?adjusted=true"
+__GRANULARITY_POLYGON_MAP = {
+    Granularity.HOUR: "hour",
+    Granularity.DAY: "day"
+}
 __KEYS: List[str] = os.environ["POLYGON_KEYS"].split(",")
 
 KEY_INDEX: int = 0
 
 
-@retry(delay=60)
-@rate_limit(limit=(len(__KEYS) * 5), sec=60)
-def __get(url: str, headers: dict = {}, params: dict = {}) -> Any:
+@RateLimit(limit=(len(__KEYS) * 5), seconds=60)
+def __get(base_url: str) -> PolygonResponse:
     global KEY_INDEX
 
-    temp_params: dict = {**params}
-    temp_url: str = f"{url}"
-
-    if "cursor" in temp_url:
-        temp_params = {}
-        temp_url += f"apiKey={__KEYS[KEY_INDEX]}"
+    url: str = f"{base_url}"
+    if "cursor" in url:
+        params = {}
+        url += f"&apiKey={__KEYS[KEY_INDEX]}"
     else:
-        temp_params["apiKey"] = __KEYS[KEY_INDEX]
+        params = {"apiKey": __KEYS[KEY_INDEX]}
 
+    response: Any = exchange(url, "GET", params=params)
     KEY_INDEX = 0 if KEY_INDEX == len(__KEYS) - 1 else KEY_INDEX + 1
-    return exchange(temp_url, "GET", headers=headers, params=temp_params)
+
+    return PolygonResponse(**response)
 
 
-def get_results(base_url: str, headers: dict = {}, params: dict = {}) -> Generator[Union[dict, List[dict]], None, None]:
+def __get_results(base_url: str) -> Generator[List[Any], None, None]:
     url: Optional[str] = f"{base_url}"
     while url is not None:
-        response: dict = __get(url, headers=headers, params=params)
-        if response["status"] != "OK":
-            raise Exception(f"[POLYGON] - Status not OK - {response['status']}")
+        response: PolygonResponse = __get(url)
+        url = response.next_url
 
-        url = response["next_url"] if "next_url" in response else None
-        yield response["results"] if "results" in response else []
+        if response.status != "OK" and response.status != "DELAYED":
+            raise Exception(f"Invalid Status - {response.status}")
+
+        yield response.results
 
 
-def get_history(ticker: str, granularity: str, start_date: str, end_date: str) -> List[Candle]:
-    url: str = __ENDPOINT_HISTORY.replace("{ticker}", ticker).replace("{start}", start_date).replace("{end}", end_date)
+def get_ticker_candle_history(ticker: str, granularity: Granularity, start_date: str, end_date: str) -> List[Candle]:
+    def to_candle(entry_raw: Any) -> Candle:
+        entry: PolygonCandle = PolygonCandle(**entry_raw)
 
-    def to_candle(entry: dict) -> Candle:
         return Candle(
-            close=entry["c"],
+            close=entry.c,
             granularity=granularity,
-            high=entry["h"],
-            low=entry["l"],
-            open=entry["o"],
+            high=entry.h,
+            low=entry.l,
+            open=entry.o,
             ticker=ticker,
-            timestamp=to_iso_8601(entry["t"]),
-            volume=entry["v"]
+            timestamp=from_timestamp(entry.t),
+            volume=entry.v
         )
+
+    path_params: dict = {
+        "end_date": end_date,
+        "granularity": __GRANULARITY_POLYGON_MAP[granularity],
+        "start_date": start_date,
+        "ticker": ticker
+    }
+    url: str = __ENDPOINT_TICKER_CANDLE_HISTORY.format(**path_params)
 
     response: List[Candle] = []
-    for results in get_results(url):
+    for results in __get_results(url):
         response += [to_candle(i) for i in results]
-
-    return response
-
-
-def get_ticker_market_cap(ticker: str) -> float:
-    params: dict = {
-        "apiKey": os.environ["POLYGON_KEY"]
-    }
-    url: str = __ENDPOINT_TICKERS + f"/{ticker}"
-
-    response: List[dict] = [i for i in get_results(url, params=params)]
-    assert len(response) == 1, f"More than 1 Response - ticker={ticker}, size={len(response)}"
-
-    return response[0]["market_cap"] if "market_cap" in response[0] else 0
-
-
-def get_tickers() -> List[Ticker]:
-    exchanges: List[str] = ["XNAS", "XNYS"]
-    params: dict = {
-        "market": "stocks",
-        "type": "CS"
-    }
-    url: str = __ENDPOINT_TICKERS
-
-    def to_ticker(entry: dict) -> Ticker:
-        return Ticker(
-            active=False,
-            exchange=entry["primary_exchange"],
-            market_cap=0,
-            name=entry["name"],
-            ticker=entry["ticker"],
-            type=entry["type"],
-            valid=entry["active"]
-        )
-
-    response: List[Ticker] = []
-    for exchange in exchanges:
-        for results in get_results(url, params={**params, "exchange": exchange}):
-            response += [to_ticker(i) for i in results]
 
     return response

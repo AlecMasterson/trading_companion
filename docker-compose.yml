@@ -1,43 +1,32 @@
 version: '3.8'
+networks:
+  network_main:
 services:
   postgres:
-    image: postgres:latest
+    image: postgres:17.2
     container_name: postgres
     restart: always
     env_file:
       - .env
+    networks:
+      - network_main
     ports:
-      - '5432:5432'
+      - '5499:5432'
     volumes:
-      - ./db:/docker-entrypoint-initdb.d/
-      - postgres-data:/var/lib/postgresql/data
+      - ./db/data:/var/lib/postgresql/data
+      - ./db/scripts:/docker-entrypoint-initdb.d
   scripts:
-    image: scripts:1.0.0
+    image: scripts-polygon:1.0.0
     container_name: scripts
     depends_on:
       - postgres
     env_file:
       .env
+    networks:
+      - network_main
+    ports:
+      - '8080:8080'
     stdin_open: true
     tty: true
     volumes:
       - ./bin:/app
-  splunk:
-    image: splunk/splunk:latest
-    container_name: splunk
-    env_file:
-      - .env
-    environment:
-      SPLUNK_ADD: "monitor /app/logs"
-      SPLUNK_START_ARGS: "--accept-license"
-    ports:
-      - '8000:8000'
-      - '8089:8089'
-    volumes:
-      - ./bin/logs:/app/logs
-      - splunk-conf:/opt/splunk/etc
-      - splunk-data:/opt/splunk/var
-volumes:
-  postgres-data:
-  splunk-conf:
-  splunk-data:
