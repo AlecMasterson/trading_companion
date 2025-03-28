@@ -6,3 +6,4 @@ class Indicator(Enum):
     MACD = "MACD"
     RSI = "RSI"
     SMA = "SMA"
+    STOCH = "STOCH"

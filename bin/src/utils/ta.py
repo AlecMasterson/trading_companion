@@ -67,6 +67,17 @@ def _sma(request: IndicatorRequest, candles: List[Candle]) -> List[CandleIndicat
     return __parse_results(candles, results)
 
 
+def _stoch(request: IndicatorRequest, candles: List[Candle]) -> List[CandleIndicator]:
+    args: dict = {} # TODO: add parameters for STOCH
+
+    close: NDArray[numpy.float64] = numpy.array([candle.close for candle in candles])
+    high: NDArray[numpy.float64] = numpy.array([candle.high for candle in candles])
+    low: NDArray[numpy.float64] = numpy.array([candle.low for candle in candles])
+
+    results: Tuple[NDArray[numpy.float64], ...] = talib.STOCH(high, low, close, **args)
+    return __parse_results_tuple(candles, results)
+
+
 def get_indicator_values(request: IndicatorRequest, candles: List[Candle]) -> List[CandleIndicator]:
     candles_sorted: List[Candle] = sorted(candles, key=lambda candle: candle.timestamp)
 
@@ -79,5 +90,7 @@ def get_indicator_values(request: IndicatorRequest, candles: List[Candle]) -> Li
             return _rsi(request, candles_sorted)
         case Indicator.SMA:
             return _sma(request, candles_sorted)
+        case Indicator.STOCH:
+            return _stoch(request, candles_sorted)
         case _:
             raise NotImplementedError
