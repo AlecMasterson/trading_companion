@@ -1,7 +1,8 @@
 from enums.Granularity import Granularity
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from models.Candle import Candle, CandleIndicator
+from models.Candle import Candle
+from models.IndicatorCandle import IndicatorCandle
 from models.IndicatorRequest import IndicatorRequest
 from sqlalchemy.sql import Select
 from sqlmodel import Session, select
@@ -32,7 +33,7 @@ def get_ticker_history(ticker: str, granularity: Granularity, database_session: 
     return database_session.exec(statement).all()
 
 
-@app.post("/api/tickers/indicator", response_model=List[CandleIndicator])
-def get_indicator(request: IndicatorRequest, database_session: Session = Depends(get_database_session)) -> List[CandleIndicator]:
+@app.post("/api/tickers/indicator", response_model=List[IndicatorCandle])
+def get_indicator(request: IndicatorRequest, database_session: Session = Depends(get_database_session)) -> List[IndicatorCandle]:
     candles: List[Candle] = get_ticker_history(request.ticker, request.granularity, database_session)
     return get_indicator_values(request, candles)

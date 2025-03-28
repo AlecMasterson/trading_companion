@@ -20,6 +20,7 @@ class RateLimit:
             return func(*args, **kwargs)
         return wrapper
 
+# TODO: rework this
 def retry(delay: int = 5, num_retries: int = 3):
     def wrapper_1(func):
         log_prefix: str = f"retry_module=[{func.__module__}] - retry_func=[{func.__name__}]"

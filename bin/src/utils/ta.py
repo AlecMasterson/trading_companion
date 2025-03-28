@@ -1,32 +1,37 @@
 from enums.Indicator import Indicator
-from models.Candle import Candle, CandleIndicator
+from models.Candle import Candle
+from models.IndicatorCandle import IndicatorCandle
 from models.IndicatorRequest import IndicatorRequest
 from numpy.typing import NDArray
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 import numpy
 import talib
 
 
-def __parse_results(candles: List[Candle], results: NDArray[numpy.float64]) -> List[CandleIndicator]:
-    response: List[CandleIndicator] = []
+def __convert_to_float(value: numpy.float64) -> Optional[float]:
+    return None if numpy.isnan(value) else float(value)
+
+
+def __parse_results(candles: List[Candle], results: NDArray[numpy.float64]) -> List[IndicatorCandle]:
+    response: List[IndicatorCandle] = []
 
     for index, candle in enumerate(candles):
-        response.append(CandleIndicator(timestamp=candle.timestamp, value=None if numpy.isnan(results[index]) else results[index]))
+        response.append(IndicatorCandle(timestamp=candle.timestamp, values=[__convert_to_float(results[index])]))
 
     return response
 
 
-def __parse_results_tuple(candles: List[Candle], results: Tuple[NDArray[numpy.float64], ...]) -> List[CandleIndicator]:
-    data: List[NDArray[numpy.float64]] = [list(result) for result in zip(*results)]
-    response: List[CandleIndicator] = []
+def __parse_results_tuple(candles: List[Candle], results: Tuple[NDArray[numpy.float64], ...]) -> List[IndicatorCandle]:
+    data: List[List[float]] = [[__convert_to_float(value) for value in list(result)] for result in zip(*results)]
+    response: List[IndicatorCandle] = []
 
     for index, candle in enumerate(candles):
-        response.append(CandleIndicator(timestamp=candle.timestamp, values=[None if numpy.isnan(value) else value for value in data[index]]))
+        response.append(IndicatorCandle(timestamp=candle.timestamp, values=data[index]))
 
     return response
 
 
-def _ema(request: IndicatorRequest, candles: List[Candle]) -> List[CandleIndicator]:
+def _ema(request: IndicatorRequest, candles: List[Candle]) -> List[IndicatorCandle]:
     args: dict = {}
     if request.period is not None:
         args["timeperiod"] = request.period
@@ -35,7 +40,7 @@ def _ema(request: IndicatorRequest, candles: List[Candle]) -> List[CandleIndicat
     return __parse_results(candles, results)
 
 
-def _macd(request: IndicatorRequest, candles: List[Candle]) -> List[CandleIndicator]:
+def _macd(request: IndicatorRequest, candles: List[Candle]) -> List[IndicatorCandle]:
     args: dict = {}
     if request.period_fast in request:
         args["fastperiod"] = request.period_fast
@@ -48,7 +53,7 @@ def _macd(request: IndicatorRequest, candles: List[Candle]) -> List[CandleIndica
     return __parse_results_tuple(candles, results)
 
 
-def _rsi(request: IndicatorRequest, candles: List[Candle]) -> List[CandleIndicator]:
+def _rsi(request: IndicatorRequest, candles: List[Candle]) -> List[IndicatorCandle]:
     args: dict = {}
     if request.period is not None:
         args["timeperiod"] = request.period
@@ -58,7 +63,7 @@ def _rsi(request: IndicatorRequest, candles: List[Candle]) -> List[CandleIndicat
 
 
 
-def _sma(request: IndicatorRequest, candles: List[Candle]) -> List[CandleIndicator]:
+def _sma(request: IndicatorRequest, candles: List[Candle]) -> List[IndicatorCandle]:
     args: dict = {}
     if request.period is not None:
         args["timeperiod"] = request.period
@@ -67,7 +72,7 @@ def _sma(request: IndicatorRequest, candles: List[Candle]) -> List[CandleIndicat
     return __parse_results(candles, results)
 
 
-def _stoch(request: IndicatorRequest, candles: List[Candle]) -> List[CandleIndicator]:
+def _stoch(request: IndicatorRequest, candles: List[Candle]) -> List[IndicatorCandle]:
     args: dict = {} # TODO: add parameters for STOCH
 
     close: NDArray[numpy.float64] = numpy.array([candle.close for candle in candles])
@@ -78,7 +83,7 @@ def _stoch(request: IndicatorRequest, candles: List[Candle]) -> List[CandleIndic
     return __parse_results_tuple(candles, results)
 
 
-def get_indicator_values(request: IndicatorRequest, candles: List[Candle]) -> List[CandleIndicator]:
+def get_indicator_values(request: IndicatorRequest, candles: List[Candle]) -> List[IndicatorCandle]:
     candles_sorted: List[Candle] = sorted(candles, key=lambda candle: candle.timestamp)
 
     match request.indicator:

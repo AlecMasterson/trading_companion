@@ -41,6 +41,7 @@ def __get_results(base_url: str) -> Generator[List[Any], None, None]:
         response: PolygonResponse = __get(url)
         url = response.next_url
 
+        # TODO: do something to ensure that I either don't save delayed results or update them later
         if response.status != "OK" and response.status != "DELAYED":
             raise Exception(f"Invalid Status - {response.status}")
 
