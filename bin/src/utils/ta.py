@@ -42,11 +42,11 @@ def _ema(request: IndicatorRequest, candles: List[Candle]) -> List[IndicatorCand
 
 def _macd(request: IndicatorRequest, candles: List[Candle]) -> List[IndicatorCandle]:
     args: dict = {}
-    if request.period_fast in request:
+    if request.period_fast is not None:
         args["fastperiod"] = request.period_fast
-    if request.period_signal in request:
+    if request.period_signal is not None:
         args["signalperiod"] = request.period_signal
-    if request.period_slow in request:
+    if request.period_slow is not None:
         args["slowperiod"] = request.period_slow
 
     results: Tuple[NDArray[numpy.float64], ...] = talib.MACD(numpy.array([candle.close for candle in candles]), **args)
