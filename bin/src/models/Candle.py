@@ -4,7 +4,6 @@ from sqlalchemy import DateTime
 from sqlmodel import Column, Field, SQLModel
 from utils.date_util import get_now
 
-
 class Candle(SQLModel, table=True):
 
     __table_args__ = {

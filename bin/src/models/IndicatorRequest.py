@@ -3,7 +3,6 @@ from enums.Indicator import Indicator
 from pydantic import BaseModel, Field
 from typing import Optional
 
-
 class IndicatorRequest(BaseModel):
     granularity: Granularity
     indicator: Indicator

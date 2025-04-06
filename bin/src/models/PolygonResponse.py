@@ -1,7 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Any, List, Optional
 
-
 class PolygonCandle(BaseModel):
     c: float
     h: float
@@ -11,7 +10,6 @@ class PolygonCandle(BaseModel):
     t: float
     v: float
     vw: float
-
 
 class PolygonResponse(BaseModel):
     next_url: Optional[str] = Field(default=None)
