@@ -1,7 +1,6 @@
 from datetime import datetime
 from enums.Granularity import Granularity
-from sqlalchemy import DateTime
-from sqlmodel import Column, Field, SQLModel
+from sqlmodel import Field, SQLModel
 from utils.date_util import get_now
 
 class Candle(SQLModel, table=True):
@@ -20,5 +19,5 @@ class Candle(SQLModel, table=True):
     volume: float
 
     created_at: datetime = Field(default_factory=get_now)
-    timestamp: datetime = Field(default_factory=get_now, primary_key=True)
-    updated_at: datetime = Field(sa_column=Column(DateTime, default_factory=get_now, nullable=False, onupdate=get_now)) # TODO: Fix.
+    timestamp: datetime = Field(primary_key=True)
+    updated_at: datetime = Field(default_factory=get_now) # TODO: Implement an actual update capability if new data comes in.

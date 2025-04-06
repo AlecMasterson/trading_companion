@@ -2,7 +2,6 @@ from typing import Any
 from utils import LOGGER
 import requests
 
-
 def exchange(url: str, method: str, headers: dict = {}, params: dict = {}) -> Any:
     LOGGER.info(f"[HTTP] - [{method}] - url={url}, headers={headers}, params={params}")
     response: requests.Response = requests.request(method, url, headers=headers, params=params)

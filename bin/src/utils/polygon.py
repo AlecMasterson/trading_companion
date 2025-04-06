@@ -1,24 +1,22 @@
 from enums.Granularity import Granularity
 from models.Candle import Candle
-from models.PolygonResponse import PolygonCandle, PolygonResponse
+from models.polygon.PolygonCandle import PolygonCandle
+from models.polygon.PolygonResponse import PolygonResponse
+from utils import LOGGER
 from utils.date_util import from_timestamp
 from utils.decorators import RateLimit
 from utils.requests_util import exchange
 from typing import Any, Generator, List, Optional
 import os
 
-
-__ENDPOINT_TICKER_CANDLE_HISTORY: str = "https://api.polygon.io/v2/aggs/ticker/{ticker}/range/1/{granularity}/{start_date}/{end_date}?adjusted=true"
 __GRANULARITY_POLYGON_MAP = {
     Granularity.HOUR: "hour",
     Granularity.DAY: "day"
 }
 __KEYS: List[str] = os.environ["POLYGON_KEYS"].split(",")
-
 KEY_INDEX: int = 0
 
-
-@RateLimit(limit=(len(__KEYS) * 5), seconds=60)
+@RateLimit(limit=(len(__KEYS) * 5), seconds=65)
 def __get(base_url: str) -> PolygonResponse:
     global KEY_INDEX
 
@@ -34,19 +32,18 @@ def __get(base_url: str) -> PolygonResponse:
 
     return PolygonResponse(**response)
 
-
 def __get_results(base_url: str) -> Generator[List[Any], None, None]:
     url: Optional[str] = f"{base_url}"
+
     while url is not None:
         response: PolygonResponse = __get(url)
-        url = response.next_url
+        url: Optional[str] = response.next_url
 
-        # TODO: do something to ensure that I either don't save delayed results or update them later
-        if response.status != "OK" and response.status != "DELAYED":
-            raise Exception(f"Invalid Status - {response.status}")
-
-        yield response.results
-
+        if response.status == "OK":
+            yield response.results
+        else:
+            LOGGER.warning(f"Invalid Status - {response.status}")
+            yield []
 
 def get_ticker_candle_history(ticker: str, granularity: Granularity, start_date: str, end_date: str) -> List[Candle]:
     def to_candle(entry_raw: Any) -> Candle:
@@ -63,13 +60,7 @@ def get_ticker_candle_history(ticker: str, granularity: Granularity, start_date:
             volume=entry.v
         )
 
-    path_params: dict = {
-        "end_date": end_date,
-        "granularity": __GRANULARITY_POLYGON_MAP[granularity],
-        "start_date": start_date,
-        "ticker": ticker
-    }
-    url: str = __ENDPOINT_TICKER_CANDLE_HISTORY.format(**path_params)
+    url: str = f"https://api.polygon.io/v2/aggs/ticker/{ticker}/range/1/{__GRANULARITY_POLYGON_MAP[granularity]}/{start_date}/{end_date}?adjusted=true"
 
     response: List[Candle] = []
     for results in __get_results(url):
