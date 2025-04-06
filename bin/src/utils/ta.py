@@ -7,10 +7,8 @@ from typing import List, Optional, Tuple
 import numpy
 import talib
 
-
 def __convert_to_float(value: numpy.float64) -> Optional[float]:
     return None if numpy.isnan(value) else float(value)
-
 
 def __parse_results(candles: List[Candle], results: NDArray[numpy.float64]) -> List[IndicatorCandle]:
     response: List[IndicatorCandle] = []
@@ -19,7 +17,6 @@ def __parse_results(candles: List[Candle], results: NDArray[numpy.float64]) -> L
         response.append(IndicatorCandle(timestamp=candle.timestamp, values=[__convert_to_float(results[index])]))
 
     return response
-
 
 def __parse_results_tuple(candles: List[Candle], results: Tuple[NDArray[numpy.float64], ...]) -> List[IndicatorCandle]:
     data: List[List[float]] = [[__convert_to_float(value) for value in list(result)] for result in zip(*results)]
@@ -30,7 +27,6 @@ def __parse_results_tuple(candles: List[Candle], results: Tuple[NDArray[numpy.fl
 
     return response
 
-
 def _ema(request: IndicatorRequest, candles: List[Candle]) -> List[IndicatorCandle]:
     args: dict = {}
     if request.period is not None:
@@ -38,7 +34,6 @@ def _ema(request: IndicatorRequest, candles: List[Candle]) -> List[IndicatorCand
 
     results: NDArray[numpy.float64] = talib.EMA(numpy.array([candle.close for candle in candles]), **args)
     return __parse_results(candles, results)
-
 
 def _macd(request: IndicatorRequest, candles: List[Candle]) -> List[IndicatorCandle]:
     args: dict = {}
@@ -52,7 +47,6 @@ def _macd(request: IndicatorRequest, candles: List[Candle]) -> List[IndicatorCan
     results: Tuple[NDArray[numpy.float64], ...] = talib.MACD(numpy.array([candle.close for candle in candles]), **args)
     return __parse_results_tuple(candles, results)
 
-
 def _rsi(request: IndicatorRequest, candles: List[Candle]) -> List[IndicatorCandle]:
     args: dict = {}
     if request.period is not None:
@@ -61,8 +55,6 @@ def _rsi(request: IndicatorRequest, candles: List[Candle]) -> List[IndicatorCand
     results: NDArray[numpy.float64] = talib.RSI(numpy.array([candle.close for candle in candles]), **args)
     return __parse_results(candles, results)
 
-
-
 def _sma(request: IndicatorRequest, candles: List[Candle]) -> List[IndicatorCandle]:
     args: dict = {}
     if request.period is not None:
@@ -70,7 +62,6 @@ def _sma(request: IndicatorRequest, candles: List[Candle]) -> List[IndicatorCand
 
     results: NDArray[numpy.float64] = talib.SMA(numpy.array([candle.close for candle in candles]), **args)
     return __parse_results(candles, results)
-
 
 def _stoch(request: IndicatorRequest, candles: List[Candle]) -> List[IndicatorCandle]:
     args: dict = {} # TODO: add parameters for STOCH
@@ -81,7 +72,6 @@ def _stoch(request: IndicatorRequest, candles: List[Candle]) -> List[IndicatorCa
 
     results: Tuple[NDArray[numpy.float64], ...] = talib.STOCH(high, low, close, **args)
     return __parse_results_tuple(candles, results)
-
 
 def get_indicator_values(request: IndicatorRequest, candles: List[Candle]) -> List[IndicatorCandle]:
     candles_sorted: List[Candle] = sorted(candles, key=lambda candle: candle.timestamp)
