@@ -31,7 +31,7 @@ const IndicatorOptions: React.ReactElement<MenuItemProps>[] =
 
 const IndicatorConfigurator = React.forwardRef((props: IndicatorConfiguratorProps, ref: any): React.ReactElement<IndicatorConfiguratorProps> => {
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
-  const [selectedIndicator, setSelectedIndicator] = React.useState<Indicator>(Indicator.RSI);
+  const [selectedIndicator, setSelectedIndicator] = React.useState<Indicator>(Indicator.EMA);
 
   React.useImperativeHandle(ref, (): IndicatorConfiguratorRef => ({
     setIsOpen
@@ -53,6 +53,7 @@ const IndicatorConfigurator = React.forwardRef((props: IndicatorConfiguratorProp
       id: selectedIndicator,
       indicator: selectedIndicator
     });
+
     onClose();
   }, [props.onSubmit, onClose, selectedIndicator]);
 
