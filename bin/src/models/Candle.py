@@ -1,22 +1,18 @@
 from datetime import datetime
 from enums.Granularity import Granularity
+from models.CandleBase import CandleBase
 from sqlmodel import Field, SQLModel
 from utils.date_util import get_now
 
-class Candle(SQLModel, table=True):
+class Candle(SQLModel, CandleBase, table=True):
 
     __table_args__ = {
         "schema": "market_data"
     }
     __tablename__ = "candles"
 
-    close: float
     granularity: Granularity = Field(primary_key=True)
-    high: float
-    low: float
-    open: float
     ticker: str = Field(primary_key=True)
-    volume: float
 
     created_at: datetime = Field(default_factory=get_now)
     timestamp: datetime = Field(primary_key=True)
