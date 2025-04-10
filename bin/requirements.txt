@@ -1,8 +1,9 @@
-fastapi==0.115.11
+fastapi==0.115.12
 pandas==2.2.3
 psycopg2-binary==2.9.10
 pydantic==2.10.6
 requests==2.32.3
 SQLAlchemy==2.0.36
+sqlmodel==0.0.24
 ta-lib==0.6.3
 uvicorn==0.34.0
