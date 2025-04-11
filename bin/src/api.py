@@ -7,6 +7,7 @@ from sqlalchemy.sql import Select
 from sqlmodel import Session, select
 from typing import List, Tuple
 from utils.database import get_database_session
+from utils.signal_util import apply_signals
 from utils.ta import apply_indicator
 
 app: FastAPI = FastAPI(title="Trading Companion")
@@ -33,5 +34,6 @@ def get_ticker_history(
 
     candles_enriched: List[EnrichedCandle] = [EnrichedCandle(**candle.model_dump()) for candle in candles]
     [apply_indicator(indicator_config, candles_enriched) for indicator_config in request.indicator_configs]
+    apply_signals(candles_enriched)
 
     return candles_enriched
