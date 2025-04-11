@@ -1,7 +1,7 @@
 from enums.Indicator import Indicator
-from models.Candle import Candle
-from models.IndicatorCandle import IndicatorCandle
-from models.IndicatorRequest import IndicatorRequest
+from models.EnrichedCandle import EnrichedCandle
+from models.IndicatorConfig import IndicatorConfig
+from models.IndicatorEntry import IndicatorEntry
 from numpy.typing import NDArray
 from typing import List, Optional, Tuple
 import numpy
@@ -10,60 +10,53 @@ import talib
 def __convert_to_float(value: numpy.float64) -> Optional[float]:
     return None if numpy.isnan(value) else float(value)
 
-def __parse_results(candles: List[Candle], results: NDArray[numpy.float64]) -> List[IndicatorCandle]:
-    response: List[IndicatorCandle] = []
-
+def __parse_results(indicator_config: IndicatorConfig, candles: List[EnrichedCandle], results: NDArray[numpy.float64]) -> None:
     for index, candle in enumerate(candles):
-        response.append(IndicatorCandle(timestamp=candle.timestamp, values=[__convert_to_float(results[index])]))
+        data: List[Optional[float]] = [__convert_to_float(results[index])]
+        candle.indicators.append(IndicatorEntry(data=data, id=indicator_config.id, indicator=indicator_config.indicator))
 
-    return response
-
-def __parse_results_tuple(candles: List[Candle], results: Tuple[NDArray[numpy.float64], ...]) -> List[IndicatorCandle]:
-    data: List[List[float]] = [[__convert_to_float(value) for value in list(result)] for result in zip(*results)]
-    response: List[IndicatorCandle] = []
-
+def __parse_results_tuple(indicator_config: IndicatorConfig, candles: List[EnrichedCandle], results: Tuple[NDArray[numpy.float64], ...]) -> None:
+    data: List[List[Optional[float]]] = [[__convert_to_float(value) for value in list(values)] for values in zip(*results)]
     for index, candle in enumerate(candles):
-        response.append(IndicatorCandle(timestamp=candle.timestamp, values=data[index]))
+        candle.indicators.append(IndicatorEntry(data=data[index], id=indicator_config.id, indicator=indicator_config.indicator))
 
-    return response
-
-def _ema(request: IndicatorRequest, candles: List[Candle]) -> List[IndicatorCandle]:
+def _ema(indicator_config: IndicatorConfig, candles: List[EnrichedCandle]) -> None:
     args: dict = {}
-    if request.period is not None:
-        args["timeperiod"] = request.period
+    if indicator_config.period is not None:
+        args["timeperiod"] = indicator_config.period
 
     results: NDArray[numpy.float64] = talib.EMA(numpy.array([candle.close for candle in candles]), **args)
-    return __parse_results(candles, results)
+    __parse_results(indicator_config, candles, results)
 
-def _macd(request: IndicatorRequest, candles: List[Candle]) -> List[IndicatorCandle]:
+def _macd(indicator_config: IndicatorConfig, candles: List[EnrichedCandle]) -> None:
     args: dict = {}
-    if request.period_fast is not None:
-        args["fastperiod"] = request.period_fast
-    if request.period_signal is not None:
-        args["signalperiod"] = request.period_signal
-    if request.period_slow is not None:
-        args["slowperiod"] = request.period_slow
+    if indicator_config.period_fast is not None:
+        args["fastperiod"] = indicator_config.period_fast
+    if indicator_config.period_signal is not None:
+        args["signalperiod"] = indicator_config.period_signal
+    if indicator_config.period_slow is not None:
+        args["slowperiod"] = indicator_config.period_slow
 
     results: Tuple[NDArray[numpy.float64], ...] = talib.MACD(numpy.array([candle.close for candle in candles]), **args)
-    return __parse_results_tuple(candles, results)
+    __parse_results_tuple(indicator_config, candles, results)
 
-def _rsi(request: IndicatorRequest, candles: List[Candle]) -> List[IndicatorCandle]:
+def _rsi(indicator_config: IndicatorConfig, candles: List[EnrichedCandle]) -> None:
     args: dict = {}
-    if request.period is not None:
-        args["timeperiod"] = request.period
+    if indicator_config.period is not None:
+        args["timeperiod"] = indicator_config.period
 
     results: NDArray[numpy.float64] = talib.RSI(numpy.array([candle.close for candle in candles]), **args)
-    return __parse_results(candles, results)
+    __parse_results(indicator_config, candles, results)
 
-def _sma(request: IndicatorRequest, candles: List[Candle]) -> List[IndicatorCandle]:
+def _sma(indicator_config: IndicatorConfig, candles: List[EnrichedCandle]) -> None:
     args: dict = {}
-    if request.period is not None:
-        args["timeperiod"] = request.period
+    if indicator_config.period is not None:
+        args["timeperiod"] = indicator_config.period
 
     results: NDArray[numpy.float64] = talib.SMA(numpy.array([candle.close for candle in candles]), **args)
-    return __parse_results(candles, results)
+    __parse_results(indicator_config, candles, results)
 
-def _stoch(request: IndicatorRequest, candles: List[Candle]) -> List[IndicatorCandle]:
+def _stoch(indicator_config: IndicatorConfig, candles: List[EnrichedCandle]) -> None:
     args: dict = {} # TODO: add parameters for STOCH
 
     close: NDArray[numpy.float64] = numpy.array([candle.close for candle in candles])
@@ -71,21 +64,19 @@ def _stoch(request: IndicatorRequest, candles: List[Candle]) -> List[IndicatorCa
     low: NDArray[numpy.float64] = numpy.array([candle.low for candle in candles])
 
     results: Tuple[NDArray[numpy.float64], ...] = talib.STOCH(high, low, close, **args)
-    return __parse_results_tuple(candles, results)
+    __parse_results_tuple(indicator_config, candles, results)
 
-def get_indicator_values(request: IndicatorRequest, candles: List[Candle]) -> List[IndicatorCandle]:
-    candles_sorted: List[Candle] = sorted(candles, key=lambda candle: candle.timestamp)
-
-    match request.indicator:
+def apply_indicator(indicator_config: IndicatorConfig, candles: List[EnrichedCandle]) -> None:
+    match indicator_config.indicator:
         case Indicator.EMA:
-            return _ema(request, candles_sorted)
+            _ema(indicator_config, candles)
         case Indicator.MACD:
-            return _macd(request, candles_sorted)
+            _macd(indicator_config, candles)
         case Indicator.RSI:
-            return _rsi(request, candles_sorted)
+            _rsi(indicator_config, candles)
         case Indicator.SMA:
-            return _sma(request, candles_sorted)
+            _sma(indicator_config, candles)
         case Indicator.STOCH:
-            return _stoch(request, candles_sorted)
+            _stoch(indicator_config, candles)
         case _:
             raise NotImplementedError

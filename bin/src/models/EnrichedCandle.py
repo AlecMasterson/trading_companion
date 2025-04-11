@@ -1,6 +1,7 @@
 from models.CandleBase import CandleBase
+from models.IndicatorEntry import IndicatorEntry
 from pydantic import Field
-from typing import Dict, List, Optional
+from typing import List
 
 class EnrichedCandle(CandleBase):
-    indicators: Dict[str, List[Optional[float]]] = Field(default={})
+    indicators: List[IndicatorEntry] = Field(default=[])
