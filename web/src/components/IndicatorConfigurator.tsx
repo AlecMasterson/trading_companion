@@ -45,11 +45,11 @@ const IndicatorConfigurator = React.forwardRef((props: IndicatorConfiguratorProp
   const onClose: () => void =
     React.useCallback((): void => {
       setIsOpen(false);
-    }, [setIsOpen]);
+      setSelectedIndicator(Indicator.EMA);
+    }, [setIsOpen, setSelectedIndicator]);
 
   const onSubmit: () => void = React.useCallback((): void => {
     props.onSubmit({
-      data: [],
       id: selectedIndicator,
       indicator: selectedIndicator
     });
