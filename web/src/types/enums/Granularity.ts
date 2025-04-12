@@ -1,4 +1,4 @@
 export enum Granularity {
-    HOUR='Hour',
-    DAY='Day'
+  HOUR='Hour',
+  DAY='Day'
 }

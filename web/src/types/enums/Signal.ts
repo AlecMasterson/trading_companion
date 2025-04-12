@@ -1,3 +1,3 @@
 export enum Signal {
-    TEST='TEST'
+  TEST='TEST'
 }
