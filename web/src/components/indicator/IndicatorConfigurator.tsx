@@ -9,10 +9,13 @@ import {
   InputLabel,
   MenuItem,
   MenuItemProps,
-  Select
+  Select,
+  SelectChangeEvent
 } from '@mui/material';
-import {Indicator} from '../types/enums/Indicator';
-import {IndicatorConfig} from '../types/IndicatorConfig';
+import {Indicator} from '../../types/enums/Indicator';
+import {IndicatorConfig} from '../../types/IndicatorConfig';
+import {ValueMap} from '../../types/ValueMap';
+import CustomInputs, {CustomInputsRef, getIndicatorId} from './CustomInputs';
 
 interface IndicatorConfiguratorProps {
   onSubmit: (_: IndicatorConfig) => void;
@@ -30,32 +33,33 @@ const IndicatorOptions: React.ReactElement<MenuItemProps>[] =
   ));
 
 const IndicatorConfigurator = React.forwardRef((props: IndicatorConfiguratorProps, ref: any): React.ReactElement<IndicatorConfiguratorProps> => {
+  const refCustomInputs: React.RefObject<CustomInputsRef> = React.useRef<CustomInputsRef>(null);
+
+  const [indicator, setIndicator] = React.useState<Indicator>(Indicator.EMA);
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
-  const [selectedIndicator, setSelectedIndicator] = React.useState<Indicator>(Indicator.EMA);
 
-  React.useImperativeHandle(ref, (): IndicatorConfiguratorRef => ({
-    setIsOpen
-  }));
+  React.useImperativeHandle(ref, (): IndicatorConfiguratorRef => ({setIsOpen}));
 
-  const onChangeIndicator: (event: {target: {value: string}}) => void =
-    React.useCallback((event: {target: {value: string}}): void => {
-      setSelectedIndicator(event.target.value as Indicator);
-    }, [setSelectedIndicator]);
+  const onChange: (value: string) => void = React.useCallback((value: string): void => {
+    setIndicator(value as Indicator);
+  }, []);
 
-  const onClose: () => void =
-    React.useCallback((): void => {
-      setIsOpen(false);
-      setSelectedIndicator(Indicator.EMA);
-    }, [setIsOpen, setSelectedIndicator]);
+  const onClose: () => void = React.useCallback((): void => {
+    setIndicator(Indicator.EMA);
+    setIsOpen(false);
+  }, []);
 
   const onSubmit: () => void = React.useCallback((): void => {
+    const values: ValueMap<number> = refCustomInputs.current?.values ?? {};
+
     props.onSubmit({
-      id: selectedIndicator,
-      indicator: selectedIndicator
+      id: getIndicatorId(indicator, values),
+      indicator,
+      ...values
     });
 
     onClose();
-  }, [props.onSubmit, onClose, selectedIndicator]);
+  }, [indicator, refCustomInputs]);
 
   return (
     <Dialog fullWidth onClose={onClose} open={isOpen}>
@@ -69,14 +73,24 @@ const IndicatorConfigurator = React.forwardRef((props: IndicatorConfiguratorProp
             Indicator
           </InputLabel>
 
-          <Select label='Indicator' labelId='label-indicator' onChange={onChangeIndicator} value={selectedIndicator}>
+          <Select
+            label='Indicator'
+            labelId='label-indicator'
+            onChange={(event: SelectChangeEvent): void => onChange(event.target.value)}
+            value={indicator}
+          >
             {IndicatorOptions}
           </Select>
+
+          <CustomInputs
+            indicator={indicator}
+            ref={refCustomInputs}
+          />
         </FormControl>
       </DialogContent>
 
       <DialogActions>
-        <Button color='secondary' onClick={onClose}>
+        <Button color='secondary' onClick={onClose} variant='outlined'>
           Cancel
         </Button>
 
