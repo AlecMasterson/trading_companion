@@ -41,7 +41,7 @@ export function getIndicatorId(indicator: Indicator, values: ValueMap<number>): 
   return indicator + `(${formatted})`;
 }
 
-const CustomInputs = React.memo(React.forwardRef((props: CustomInputsProps, ref: any): React.ReactElement[] => {
+const CustomInputs = React.memo(React.forwardRef((props: CustomInputsProps, ref: any): React.ReactElement<CustomInputsProps>[] => {
   const [values, setValues] = React.useState<ValueMap<number>>({});
 
   React.useImperativeHandle(ref, (): CustomInputsRef => ({values}), [values]);
