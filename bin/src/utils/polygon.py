@@ -10,12 +10,13 @@ from utils.decorators import RateLimit
 from utils.requests_util import exchange
 from typing import Any, Generator, List, Optional
 import os
+import re
 
 __GRANULARITY_POLYGON_MAP = {
     Granularity.HOUR: "hour",
     Granularity.DAY: "day"
 }
-__KEYS: List[str] = os.environ["POLYGON_KEYS"].split(",")
+__KEYS: List[str] = [os.environ[key] for key in os.environ if re.compile(r"^POLYGON_KEY_(\d+)$").match(key)]
 KEY_INDEX: int = 0
 
 @RateLimit(limit=(len(__KEYS) * 5), seconds=65)
