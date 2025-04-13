@@ -1,7 +1,9 @@
 from enums.Granularity import Granularity
 from models.Candle import Candle
+from models.Ticker import Ticker
 from models.polygon.PolygonCandle import PolygonCandle
 from models.polygon.PolygonResponse import PolygonResponse
+from models.polygon.PolygonTicker import PolygonTicker
 from utils import LOGGER
 from utils.date_util import from_timestamp
 from utils.decorators import RateLimit
@@ -65,5 +67,22 @@ def get_ticker_candle_history(ticker: str, granularity: Granularity, start_date:
     response: List[Candle] = []
     for results in __get_results(url):
         response += [to_candle(i) for i in results]
+
+    return response
+
+def get_tickers() -> List[Ticker]:
+    def to_ticker(entry_raw: Any) -> Ticker:
+        entry: PolygonTicker = PolygonTicker(**entry_raw)
+
+        return Ticker(
+            name=entry.name,
+            ticker=entry.ticker
+        )
+
+    url: str = "https://api.polygon.io/v3/reference/tickers?active=true&market=stocks&type=CS"
+
+    response: List[Ticker] = []
+    for results in __get_results(url):
+        response += [to_ticker(i) for i in results]
 
     return response
