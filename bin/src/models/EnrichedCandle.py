@@ -1,9 +1,8 @@
 from enums.Signal import Signal
 from models.CandleBase import CandleBase
-from models.IndicatorEntry import IndicatorEntry
 from pydantic import Field
-from typing import List
+from typing import Dict, List, Optional
 
 class EnrichedCandle(CandleBase):
-    indicators: List[IndicatorEntry] = Field(default=[])
+    indicators: Dict[str, List[Optional[float]]] = Field(default={})
     signals: List[Signal] = Field(default=[])

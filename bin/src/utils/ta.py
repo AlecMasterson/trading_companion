@@ -1,7 +1,6 @@
 from enums.Indicator import Indicator
 from models.EnrichedCandle import EnrichedCandle
 from models.IndicatorConfig import IndicatorConfig
-from models.IndicatorEntry import IndicatorEntry
 from numpy.typing import NDArray
 from typing import List, Optional, Tuple
 import numpy
@@ -24,13 +23,12 @@ def __derivative(data: NDArray[numpy.float64], window_size: int) -> NDArray[nump
 
 def __parse_results(indicator_config: IndicatorConfig, candles: List[EnrichedCandle], results: NDArray[numpy.float64]) -> None:
     for index, candle in enumerate(candles):
-        data: List[Optional[float]] = [__convert_to_float(results[index])]
-        candle.indicators.append(IndicatorEntry(data=data, id=indicator_config.id, indicator=indicator_config.indicator))
+        candle.indicators[indicator_config.id] = [__convert_to_float(results[index])]
 
 def __parse_results_tuple(indicator_config: IndicatorConfig, candles: List[EnrichedCandle], results: Tuple[NDArray[numpy.float64], ...]) -> None:
     data: List[List[Optional[float]]] = [[__convert_to_float(value) for value in list(values)] for values in zip(*results)]
     for index, candle in enumerate(candles):
-        candle.indicators.append(IndicatorEntry(data=data[index], id=indicator_config.id, indicator=indicator_config.indicator))
+        candle.indicators[indicator_config.id] = data[index]
 
 def _ema(indicator_config: IndicatorConfig, candles: List[EnrichedCandle]) -> None:
     args: dict = {}
