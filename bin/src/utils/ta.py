@@ -10,6 +10,18 @@ import talib
 def __convert_to_float(value: numpy.float64) -> Optional[float]:
     return None if numpy.isnan(value) else float(value)
 
+def __derivative(data: NDArray[numpy.float64], window_size: int) -> NDArray[numpy.float64]:
+    x_vals: NDArray[numpy.float64] = numpy.arange(window_size)
+    slopes: NDArray[numpy.float64] = numpy.full_like(data, fill_value=numpy.nan, dtype=numpy.float64)
+
+    for i in range(window_size-1, len(data)):
+        chunk: NDArray[numpy.float64] = data[i-window_size+1:i+1]
+        A: NDArray[numpy.float64] = numpy.vstack([x_vals, numpy.ones(window_size)]).T
+        m, _ = numpy.linalg.lstsq(A, chunk, rcond=None)[0]
+        slopes[i] = m
+
+    return slopes
+
 def __parse_results(indicator_config: IndicatorConfig, candles: List[EnrichedCandle], results: NDArray[numpy.float64]) -> None:
     for index, candle in enumerate(candles):
         data: List[Optional[float]] = [__convert_to_float(results[index])]
@@ -56,6 +68,31 @@ def _sma(indicator_config: IndicatorConfig, candles: List[EnrichedCandle]) -> No
     results: NDArray[numpy.float64] = talib.SMA(numpy.array([candle.close for candle in candles]), **args)
     __parse_results(indicator_config, candles, results)
 
+def _sma_slope(indicator_config: IndicatorConfig, candles: List[EnrichedCandle]) -> None:
+    args: dict = {}
+    window_size: int = 10
+    if indicator_config.period is not None:
+        args["timeperiod"] = indicator_config.period
+    if indicator_config.window_size is not None:
+        window_size = indicator_config.window_size
+
+    results: NDArray[numpy.float64] = talib.SMA(numpy.array([candle.close for candle in candles]), **args)
+    results: NDArray[numpy.float64] = __derivative(results, window_size)
+    __parse_results(indicator_config, candles, results)
+
+def _sma_slope_slope(indicator_config: IndicatorConfig, candles: List[EnrichedCandle]) -> None:
+    args: dict = {}
+    window_size: int = 10
+    if indicator_config.period is not None:
+        args["timeperiod"] = indicator_config.period
+    if indicator_config.window_size is not None:
+        window_size = indicator_config.window_size
+
+    results: NDArray[numpy.float64] = talib.SMA(numpy.array([candle.close for candle in candles]), **args)
+    results: NDArray[numpy.float64] = __derivative(results, window_size)
+    results: NDArray[numpy.float64] = __derivative(results, window_size)
+    __parse_results(indicator_config, candles, results)
+
 def _stoch(indicator_config: IndicatorConfig, candles: List[EnrichedCandle]) -> None:
     args: dict = {} # TODO: add parameters for STOCH
 
@@ -76,6 +113,10 @@ def apply_indicator(indicator_config: IndicatorConfig, candles: List[EnrichedCan
             _rsi(indicator_config, candles)
         case Indicator.SMA:
             _sma(indicator_config, candles)
+        case Indicator.SMA_SLOPE:
+            _sma_slope(indicator_config, candles)
+        case Indicator.SMA_SLOPE_SLOPE:
+            _sma_slope_slope(indicator_config, candles)
         case Indicator.STOCH:
             _stoch(indicator_config, candles)
         case _:
