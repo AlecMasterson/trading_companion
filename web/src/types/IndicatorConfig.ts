@@ -1,10 +1,8 @@
 import {Indicator} from './enums/Indicator';
+import {ValueMap} from './ValueMap';
 
 export interface IndicatorConfig {
   id: string;
   indicator: Indicator;
-  period?: number;
-  periodFast?: number;
-  periodSignal?: number;
-  periodSlow?: number;
+  options: ValueMap<any>;
 }

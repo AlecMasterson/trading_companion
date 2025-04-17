@@ -50,12 +50,12 @@ const IndicatorConfigurator = React.forwardRef((props: IndicatorConfiguratorProp
   }, []);
 
   const onSubmit: () => void = React.useCallback((): void => {
-    const values: ValueMap<number> = refCustomInputs.current?.values ?? {};
+    const options: ValueMap<any> = refCustomInputs.current?.options ?? {};
 
     props.onSubmit({
-      id: getIndicatorId(indicator, values),
+      id: getIndicatorId(indicator, options),
       indicator,
-      ...values
+      options
     });
 
     onClose();
