@@ -1,6 +1,5 @@
 import React from 'react';
-import {FormControl, InputLabel, MenuItem, MenuItemProps, Select} from '@mui/material';
-import {get} from 'lodash';
+import {FormControl, InputLabel, MenuItem, MenuItemProps, Select, SelectChangeEvent} from '@mui/material';
 import {Granularity} from '../types/enums/Granularity';
 
 interface GranularitySelectProps {
@@ -8,7 +7,7 @@ interface GranularitySelectProps {
   setGranularity: (_: Granularity) => void;
 }
 
-const Options: React.ReactElement<MenuItemProps>[] =
+const GranularityOptions: React.ReactElement<MenuItemProps>[] =
   Object.entries(Granularity).map((entry: [string, Granularity]): React.ReactElement<MenuItemProps> => (
     <MenuItem key={entry[0]} value={entry[1]}>
       {entry[1]}
@@ -16,9 +15,9 @@ const Options: React.ReactElement<MenuItemProps>[] =
   ));
 
 export default function GranularitySelect(props: GranularitySelectProps): React.ReactElement<GranularitySelectProps> {
-  function onChange(event: any): void {
-    props.setGranularity(get(event, 'target.value', Granularity.DAY) as Granularity);
-  }
+  const onChange: (value: string) => void = React.useCallback((value: string): void => {
+    props.setGranularity(value as Granularity);
+  }, [props.setGranularity]);
 
   return (
     <FormControl sx={{minWidth: 200}}>
@@ -29,10 +28,10 @@ export default function GranularitySelect(props: GranularitySelectProps): React.
       <Select
           label='Granularity'
           labelId='label-granularity'
-          onChange={onChange}
+          onChange={(event: SelectChangeEvent): void => onChange(event.target.value)}
           value={props.granularity}
       >
-        {Options}
+        {GranularityOptions}
       </Select>
     </FormControl>
   );

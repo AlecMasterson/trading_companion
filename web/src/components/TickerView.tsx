@@ -5,9 +5,9 @@ import {Granularity} from '../types/enums/Granularity';
 import {Candle} from '../types/Candle';
 import {IndicatorConfig} from '../types/IndicatorConfig';
 import AppApi from '../api/AppApi';
+import CandleChart from './CandleChart';
 import GranularitySelect from './GranularitySelect';
 import IndicatorConfigurator, {IndicatorConfiguratorRef} from './indicator/IndicatorConfigurator';
-import CandleChart from './CandleChart';
 import TickerSelect from './TickerSelect';
 
 export default function TickerView(): React.ReactElement {
@@ -28,7 +28,7 @@ export default function TickerView(): React.ReactElement {
     AppApi.getTickerHistory(ticker, granularity, indicatorConfigs)
       .then(setCandles)
       .finally((): void => setIsLoading(false));
-  }, [ticker, granularity, indicatorConfigs]);
+  }, [granularity, indicatorConfigs, ticker]);
 
   const onAddIndicator: (_: IndicatorConfig) => void = React.useCallback((indicatorConfig: IndicatorConfig): void => {
     setIndicatorConfigs((temp: IndicatorConfig[]): IndicatorConfig[] => [...temp, indicatorConfig]);
