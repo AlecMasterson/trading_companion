@@ -1,12 +1,13 @@
 import {Granularity} from './enums/Granularity';
 import {Signal} from './enums/Signal';
-import {IndicatorEntry} from './IndicatorEntry';
+import {OptionalNumber} from './OptionalNumber';
+import {ValueMap} from './ValueMap';
 
 export interface Candle {
   close: number;
   granularity: Granularity;
   high: number;
-  indicators: IndicatorEntry[];
+  indicators: ValueMap<OptionalNumber[]>;
   low: number;
   open: number;
   signals: Signal[];
