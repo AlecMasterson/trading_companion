@@ -4,6 +4,7 @@ import {Granularity} from '../types/enums/Granularity';
 
 interface GranularitySelectProps {
   granularity: Granularity;
+  isLoading: boolean;
   setGranularity: (_: Granularity) => void;
 }
 
@@ -26,10 +27,11 @@ export default function GranularitySelect(props: GranularitySelectProps): React.
       </InputLabel>
 
       <Select
-          label='Granularity'
-          labelId='label-granularity'
-          onChange={(event: SelectChangeEvent): void => onChange(event.target.value)}
-          value={props.granularity}
+        disabled={props.isLoading}
+        label='Granularity'
+        labelId='label-granularity'
+        onChange={(event: SelectChangeEvent): void => onChange(event.target.value)}
+        value={props.granularity}
       >
         {GranularityOptions}
       </Select>

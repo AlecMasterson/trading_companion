@@ -51,12 +51,9 @@ export default function TickerView(): React.ReactElement {
   return (
     <Paper className='fill-height' square={false} sx={{p: 2}}>
       <Grid alignItems='center' container spacing={2} sx={{pb: 2}}>
-        <TickerSelect setTicker={setTicker} />
+        <TickerSelect isLoading={isLoading} setTicker={setTicker} />
 
-        <GranularitySelect
-          granularity={granularity}
-          setGranularity={setGranularity}
-        />
+        <GranularitySelect granularity={granularity} isLoading={isLoading} setGranularity={setGranularity} />
 
         <Button disabled={isLoading} onClick={(): void => refIndicatorConfigurator.current?.setIsOpen(true)} variant='outlined'>
           Add Indicator

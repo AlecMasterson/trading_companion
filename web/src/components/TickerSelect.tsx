@@ -1,49 +1,37 @@
 import React from 'react';
 import {Autocomplete, FormControl, TextField} from '@mui/material';
-import {iTicker} from '../types/iTicker';
 import AppApi from '../api/AppApi';
 
 interface TickerSelectProps {
-  setTicker: (_: iTicker | null) => void;
-}
-
-function getSelected(tickers: iTicker[], symbol: string): iTicker | null {
-    return tickers.find((ticker: iTicker): boolean => ticker.symbol === symbol) ?? null;
+  isLoading: boolean;
+  setTicker: (ticker: string) => void;
 }
 
 export default function TickerSelect(props: TickerSelectProps): React.ReactElement<TickerSelectProps> {
-  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const [isLoading, setIsLoading] = React.useState<boolean>(true);
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
-  const [tickers, setTickers] = React.useState<iTicker[]>([]);
+  const [tickers, setTickers] = React.useState<string[]>([]);
 
   React.useEffect((): void => {
-    if (!isOpen || tickers.length > 0) {
-      return;
-    }
-
-    setIsLoading(true);
-
     AppApi.getTickers()
       .then(setTickers)
       .finally((): void => setIsLoading(false));
-  }, [isOpen]);
+  }, []);
 
   return (
     <FormControl sx={{minWidth: 200}}>
       <Autocomplete
         disableClearable
+        disabled={props.isLoading}
         loading={isLoading}
         noOptionsText='No Tickers Found'
-        onChange={(_: any, symbol: string): void => props.setTicker(getSelected(tickers, symbol))}
+        onChange={(_: any, ticker: string): void => props.setTicker(ticker)}
         onClose={(): void => setIsOpen(false)}
         onOpen={(): void => setIsOpen(true)}
         open={isOpen}
-        options={tickers.map((ticker: iTicker): string => ticker.symbol)}
-        renderInput={(params: any): any => (
-          <TextField
-            {...params}
-            label='Ticker'
-          />
+        options={tickers}
+        renderInput={(params: any): React.ReactElement => (
+          <TextField {...params} label='Ticker' />
         )}
       />
     </FormControl>

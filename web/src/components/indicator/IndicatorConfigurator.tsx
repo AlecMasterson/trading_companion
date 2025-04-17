@@ -82,10 +82,7 @@ const IndicatorConfigurator = React.forwardRef((props: IndicatorConfiguratorProp
             {IndicatorOptions}
           </Select>
 
-          <CustomInputs
-            indicator={indicator}
-            ref={refCustomInputs}
-          />
+          <CustomInputs indicator={indicator} ref={refCustomInputs} />
         </FormControl>
       </DialogContent>
 
