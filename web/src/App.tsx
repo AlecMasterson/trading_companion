@@ -50,7 +50,7 @@ export default function App(): React.ReactElement {
         <Navbar activeTabId={activeTabId} setActiveTabId={setActiveTabId} />
 
         <Grid className='fill-height' container spacing={2} sx={{m: 2}}>
-          <Grid className='fill-height' offset={{xs: 2}} size={{xs: 8}}>
+          <Grid className='fill-height' offset={2} size={8}>
             {activeTabId === TabId.MARKET_VIEW ? <TickerView /> : null}
           </Grid>
         </Grid>
