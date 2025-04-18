@@ -58,7 +58,9 @@ const ChartOptions: Options = {
     }
   },
   // time: undefined, // TODO: something
-  // tooltip: undefined, // TODO: something
+  tooltip: {
+    enabled: false
+  }
   // xAxis: undefined // TODO: something
 };
 
@@ -66,6 +68,11 @@ function getThemedChartOptions(theme: Theme): Options {
   const spacingValue: number = parseInt(theme.spacing(2).replace('px', ''));
 
   return {
+    caption: {
+      style: {
+        color: theme.palette.text.secondary
+      }
+    },
     chart: {
       backgroundColor: theme.palette.background.default,
       borderColor: theme.palette.divider,
