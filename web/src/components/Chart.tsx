@@ -27,6 +27,21 @@ const ChartOptions: Options = {
   navigator: {
     enabled: false
   },
+  plotOptions: {
+    series: {
+      states: {
+        hover: {
+          enabled: false
+        },
+        inactive: {
+          enabled: false
+        },
+        select: {
+          enabled: false
+        }
+      }
+    }
+  },
   rangeSelector: {
     enabled: false
   },
