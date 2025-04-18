@@ -5,6 +5,10 @@ import HighchartsReact from 'highcharts-react-official';
 import {merge, range} from 'lodash';
 
 const ChartOptions: Options = {
+  caption: {
+    useHTML: true,
+    verticalAlign: 'top'
+  },
   chart: {
     displayErrors: true, // this is the default, consider changing to false
     // numberFormatter: undefined, // TODO: probably want to do something here
