@@ -1,46 +1,47 @@
 {
-    "name": "trading_companion",
-    "version": "0.1.0",
-    "author": "Alec Masterson",
-    "private": true,
-    "scripts": {
-        "start": "vite --host"
-    },
-    "dependencies": {
-        "@emotion/react": "11.11.4",
-        "@emotion/styled": "11.11.5",
-        "@mui/icons-material": "5.15.18",
-        "@mui/material": "5.15.18",
-        "axios": "1.7.2",
-        "d3": "7.9.0",
-        "date-fns": "3.6.0",
-        "lodash": "4.17.21",
-        "notistack": "3.0.1",
-        "react": "18.3.1",
-        "react-dom": "18.3.1"
-    },
-    "devDependencies": {
-        "@types/d3": "7.4.3",
-        "@types/lodash": "4.17.4",
-        "@types/react": "18.3.3",
-        "@types/react-dom": "18.3.0",
-        "typescript": "5.4.5",
-        "vite": "5.2.11"
-    },
-    "engines": {
-        "node": "18.3.0",
-        "npm": "8.11.0"
-    },
-    "browserslist": {
-        "development": [
-            "last 1 chrome version",
-            "last 1 firefox version",
-            "last 1 safari version"
-        ],
-        "production": [
-            ">0.2%",
-            "not dead",
-            "not op_mini all"
-        ]
-    }
+  "name": "trading_companion",
+  "version": "0.1.0",
+  "author": "Alec Masterson",
+  "private": true,
+  "scripts": {
+    "build": "vite build",
+    "start": "vite"
+  },
+  "dependencies": {
+    "@emotion/react": "11.14.0",
+    "@emotion/styled": "11.14.0",
+    "@mui/icons-material": "6.4.8",
+    "@mui/material": "6.4.8",
+    "axios": "1.8.4",
+    "highcharts": "11.4.3",
+    "highcharts-react-official": "3.2.1",
+    "lodash": "4.17.21",
+    "notistack": "3.0.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/lodash": "4.17.4",
+    "@types/react": "18.3.3",
+    "@types/react-dom": "18.3.0",
+    "@vitejs/plugin-react-swc": "3.7.0",
+    "typescript": "5.4.5",
+    "vite": "5.2.11"
+  },
+  "engines": {
+    "node": "18.3.0",
+    "npm": "8.11.0"
+  },
+  "browserslist": {
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ],
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ]
+  }
 }
