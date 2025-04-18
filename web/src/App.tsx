@@ -1,10 +1,11 @@
 import React from 'react';
-import {Box, CssBaseline} from '@mui/material';
-import Grid from '@mui/material/Unstable_Grid2';
-import {createTheme, Theme, ThemeProvider} from '@mui/material/styles';
+import {CssBaseline} from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import {Theme, ThemeProvider, createTheme} from '@mui/material/styles';
 import darkScrollbar from '@mui/material/darkScrollbar';
-import {SnackbarProvider} from 'notistack';
-import NavBar from './NavBar';
+import {SnackbarProvider, useSnackbar} from 'notistack';
+import {setNotificationManager} from './NotificationManager';
+import Navbar, {TabId} from './components/Navbar';
 import TickerView from './components/TickerView';
 import './app.css';
 
@@ -16,7 +17,10 @@ const DarkTheme: Theme = createTheme({
   },
   palette: {
     // background: {default: '#201D39', paper: '#4E4868'},
-    background: {default: '#161A25', paper: '#161A25'},
+    background: {
+      default: '#161A25',
+      paper: '#161A25'
+    },
     mode: 'dark',
     primary: {main: '#00C899'},
     // primary: {main: '#3C63FE'},
@@ -24,21 +28,32 @@ const DarkTheme: Theme = createTheme({
   }
 });
 
+const SnackbarInitializer: React.MemoExoticComponent<() => null> = React.memo((): null => {
+  const {enqueueSnackbar} = useSnackbar();
+
+  React.useEffect((): void => {
+    setNotificationManager(enqueueSnackbar);
+  }, []);
+
+  return null;
+});
+
 export default function App(): React.ReactElement {
+  const [activeTabId, setActiveTabId] = React.useState<TabId>(TabId.MARKET_VIEW);
+
   return (
     <ThemeProvider theme={DarkTheme}>
       <CssBaseline />
 
-      <SnackbarProvider>
-        <NavBar />
+      <SnackbarProvider anchorOrigin={{horizontal: 'right', vertical: 'top'}}>
+        <SnackbarInitializer />
+        <Navbar activeTabId={activeTabId} setActiveTabId={setActiveTabId} />
 
-        <Box sx={{m: 2}}>
-          <Grid container spacing={2}>
-            <Grid xs={10} xsOffset={1}>
-              <TickerView />
-            </Grid>
+        <Grid className='fill-height' container spacing={2} sx={{m: 2}}>
+          <Grid className='fill-height' offset={{xs: 2}} size={{xs: 8}}>
+            {activeTabId === TabId.MARKET_VIEW ? <TickerView /> : null}
           </Grid>
-        </Box>
+        </Grid>
       </SnackbarProvider>
     </ThemeProvider>
   );
