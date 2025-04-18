@@ -13,9 +13,9 @@ const ChartOptions: Options = {
     displayErrors: true, // this is the default, consider changing to false
     // numberFormatter: undefined, // TODO: probably want to do something here
     // selectionMarkerFill: undefined, // TODO: figure out what this is
-    style: { // TODO: make this work
-      fontFamily: 'Roboto'
-    },
+    style: { // TODO: check other styles
+      fontFamily: 'Share Tech Mono, monospace'
+    }
     // zooming: undefined // TODO: documentation wasn't clear on this, might not need it?
   },
   credits: {
