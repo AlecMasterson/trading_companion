@@ -1,4 +1,5 @@
 from enums.Granularity import Granularity
+from enums.Source import Source
 from models.Candle import Candle
 from models.Ticker import Ticker
 from models.polygon.PolygonCandle import PolygonCandle
@@ -58,6 +59,7 @@ def get_ticker_candle_history(ticker: str, granularity: Granularity, start_date:
             high=entry.h,
             low=entry.l,
             open=entry.o,
+            source=Source.POLYGON,
             ticker=ticker,
             timestamp=from_timestamp(entry.t),
             volume=entry.v
