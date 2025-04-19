@@ -28,5 +28,13 @@ CREATE TABLE market_data.candles (
 	volume NUMERIC NOT NULL,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 	updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-	CONSTRAINT history_pk PRIMARY KEY (source, ticker, granularity, timestamp)
+	CONSTRAINT candles_pk PRIMARY KEY (source, ticker, granularity, timestamp)
+);
+
+CREATE TABLE market_data.tickers (
+	ticker VARCHAR(20) NOT NULL,
+	name VARCHAR(100) NOT NULL,
+	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+	updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+	CONSTRAINT tickers_pk PRIMARY KEY (ticker)
 );
