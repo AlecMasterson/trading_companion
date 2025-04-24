@@ -1,3 +1,4 @@
+from enums.TickerType import TickerType
 from sqlmodel import Field, SQLModel
 
 class Ticker(SQLModel, table=True):
@@ -9,3 +10,4 @@ class Ticker(SQLModel, table=True):
 
     name: str
     ticker: str = Field(primary_key=True)
+    type: TickerType

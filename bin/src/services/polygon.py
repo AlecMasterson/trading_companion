@@ -1,5 +1,7 @@
 from enums.Granularity import Granularity
 from enums.Source import Source
+from enums.TickerType import TickerType
+from enums.polygon.PolygonTickerType import PolygonTickerType
 from models.db.Candle import Candle
 from models.db.Ticker import Ticker
 from models.polygon.PolygonCandle import PolygonCandle
@@ -18,6 +20,8 @@ __GRANULARITY_POLYGON_MAP = {
     Granularity.DAY: "day"
 }
 __KEYS: List[str] = [os.environ[key] for key in os.environ if re.compile(r"^POLYGON_KEY_(\d+)$").match(key)]
+__VALID_TICKER_TYPES: List[PolygonTickerType] = [PolygonTickerType.CS, PolygonTickerType.ETF]
+
 KEY_INDEX: int = 0
 
 @RateLimit(limit=(len(__KEYS) * 5), seconds=65)
@@ -74,18 +78,33 @@ def get_ticker_candle_history(ticker: str, granularity: Granularity, start_date:
     return response
 
 def get_tickers() -> List[Ticker]:
-    def to_ticker(entry_raw: Any) -> Ticker:
+    def to_ticker(entry_raw: Any) -> Optional[Ticker]:
         entry: PolygonTicker = PolygonTicker(**entry_raw)
+
+        try:
+            if entry.type is None:
+                return None
+
+            ticker_type_polygon: PolygonTickerType = PolygonTickerType(entry.type)
+            if ticker_type_polygon not in __VALID_TICKER_TYPES:
+                return None
+
+            ticker_type: TickerType = TickerType(ticker_type_polygon.value)
+        except ValueError:
+            LOGGER.warning(f"Invalid TickerType={entry.type}")
+            return None
 
         return Ticker(
             name=entry.name,
-            ticker=entry.ticker
+            ticker=entry.ticker,
+            type=ticker_type
         )
 
-    url: str = "https://api.polygon.io/v3/reference/tickers?active=true&market=stocks&type=CS"
+    url: str = "https://api.polygon.io/v3/reference/tickers?active=true&market=stocks"
 
-    response: List[Ticker] = []
+    response: List[Optional[Ticker]] = []
     for results in __get_results(url):
         response += [to_ticker(i) for i in results]
 
-    return response
+    response: List[Ticker] = [ticker for ticker in response if ticker is not None]
+    return list({getattr(ticker, "ticker"): ticker for ticker in response}.values())
