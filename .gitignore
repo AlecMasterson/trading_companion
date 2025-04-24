@@ -1,30 +1,19 @@
-### IntelliJ IDEA ###
-.idea/
-*.iml
-
-# Python
-**/__pycache__
-**/logs/**/*.log
-scripts/**/*.csv
-bin/logs/dag_id=*/
-bin/logs/dag_processor_manager/
-bin/logs/scheduler/
-
-# API Module
-**/application-secret.yml
-
-# Bin Module
-bin/**/test*.py
-bin/logs/*.log
-
-# Web Module
-**/build
-**/coverage
-**/dist
-**/node_modules
-**/out
+# Database
+db/data
 
 # Miscellaneous
-**/target/
-**/.DS_STORE
-**/.env
+.env
+
+# Python
+bin/**/__pycache__
+bin/.tmp_dagster*
+bin/.venv_mac
+bin/.venv_windows
+bin/logs/**/*.log
+bin/src/test*.py
+
+# Resilio
+.sync
+
+# UI
+web/node_modules
