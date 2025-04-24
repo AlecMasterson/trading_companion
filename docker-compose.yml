@@ -16,7 +16,7 @@ services:
       - ./db/data:/var/lib/postgresql/data
       - ./db/scripts:/docker-entrypoint-initdb.d
   scripts:
-    image: scripts-polygon:1.0.0
+    image: trading_companion_scripts:1.0.0
     container_name: scripts
     depends_on:
       - postgres
@@ -26,6 +26,7 @@ services:
       - network_main
     ports:
       - '8080:8080'
+      - '8081:3000'
     stdin_open: true
     tty: true
     volumes:
