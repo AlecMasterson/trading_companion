@@ -1,15 +1,15 @@
 from datetime import datetime, timedelta
 from enums.Granularity import Granularity
 from models.db.Candle import Candle
+from models.db.Ticker import Ticker
 from services.polygon import get_ticker_candle_history
 from sqlalchemy.dialects.postgresql import insert as db_insert
-from sqlalchemy.orm import Session
 from sqlalchemy.sql import Executable
+from sqlmodel import Session, select
 from typing import List
 from utils import LOGGER
 from utils.database import get_database_session
 from utils.date_util import get_now_eastern, to_string
-import json
 
 def insert_candles(database_session: Session, candles: List[Candle]) -> None:
     if len(candles) == 0:
@@ -37,8 +37,9 @@ def main() -> None:
     end_date: str = to_string(today - timedelta(days=1), format="%Y-%m-%d")
     LOGGER.info(f"start_date={start_date} end_date={end_date}")
 
-    with open("./data/tickers.json", "r") as file:
-        tickers: List[str] = [i["ticker"] for i in json.load(file)]
+    tickers: List[Ticker] = database_session.exec(select(Ticker)).all()
+    tickers: List[str] = [ticker.ticker for ticker in tickers]
+    LOGGER.info(f"tickers.length={len(tickers)}")
 
     failed: List[str] = []
     for ticker in tickers:
