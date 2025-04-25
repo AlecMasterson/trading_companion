@@ -1,19 +1,12 @@
-# Database
-db/data
-
-# Miscellaneous
+*.tar
 .env
+.sync
 
-# Python
 bin/**/__pycache__
-bin/.tmp_dagster*
 bin/.venv_mac
 bin/.venv_windows
 bin/logs/**/*.log
 bin/src/test*.py
-
-# Resilio
-.sync
-
-# UI
+db/data
+web/dist
 web/node_modules
