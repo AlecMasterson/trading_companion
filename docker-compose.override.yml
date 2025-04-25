@@ -11,9 +11,9 @@ services:
     tty: true
     volumes:
       - ./bin:/app
-  web:
-    image: trading_companion_web:${VERSION}
-    container_name: web
+  ui:
+    image: trading_companion_ui:${VERSION}
+    container_name: ui
     depends_on:
       - api
     env_file:
@@ -26,4 +26,8 @@ services:
     stdin_open: true
     tty: true
     volumes:
+      - ./web/index.html:/app/web/index.html
       - ./web/src:/app/web/src
+      - ./web/package.json:/app/web/package.json
+      - ./web/tsconfig.json:/app/web/tsconfig.json
+      - ./web/vite.config.ts:/app/web/vite.config.ts
