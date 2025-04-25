@@ -1,7 +1,28 @@
 version: '3.8'
+
 networks:
   network_main:
+
+x-common-service: &common-service
+  image: trading_companion:${VERSION}
+  depends_on:
+    - postgres
+  env_file:
+    .env
+  networks:
+    - network_main
+
 services:
+  api:
+    <<: *common-service
+    container_name: api
+    ports:
+      - '8080:8080'
+  dagster:
+    <<: *common-service
+    container_name: dagster
+    ports:
+      - '3000:3000'
   postgres:
     image: postgres:17.2
     container_name: postgres
@@ -11,23 +32,7 @@ services:
     networks:
       - network_main
     ports:
-      - '5499:5432'
+      - '5432:5432'
     volumes:
       - ./db/data:/var/lib/postgresql/data
       - ./db/scripts:/docker-entrypoint-initdb.d
-  scripts:
-    image: trading_companion_scripts:1.0.0
-    container_name: scripts
-    depends_on:
-      - postgres
-    env_file:
-      .env
-    networks:
-      - network_main
-    ports:
-      - '8080:8080'
-      - '8081:3000'
-    stdin_open: true
-    tty: true
-    volumes:
-      - ./bin:/app
