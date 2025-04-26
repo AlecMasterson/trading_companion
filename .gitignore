@@ -9,6 +9,7 @@ bin/.venv_windows
 bin/dist
 bin/logs/**/*.log
 bin/src/test*.py
+bin/storage
 db/data
 web/dist
 web/node_modules

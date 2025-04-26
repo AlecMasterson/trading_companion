@@ -5,5 +5,6 @@ bin/.venv_windows
 bin/dist
 bin/logs/**/*.log
 bin/src/test*.py
+bin/storage
 web/dist
 web/node_modules
