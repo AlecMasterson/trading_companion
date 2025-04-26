@@ -1,6 +1,7 @@
 bin/**/__pycache__
 bin/.venv_mac
 bin/.venv_windows
+bin/dist
 bin/logs/**/*.log
 bin/src/test*.py
 web/dist
