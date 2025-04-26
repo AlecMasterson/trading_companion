@@ -12,6 +12,9 @@ services:
     tty: true
     volumes:
       - ./bin:/app
+  postgres:
+    ports:
+      - '5499:5432'
   ui:
     image: trading_companion_ui:${VERSION}
     container_name: ui
