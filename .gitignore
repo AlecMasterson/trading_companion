@@ -3,6 +3,7 @@
 .sync
 
 bin/**/__pycache__
+bin/.nux
 bin/.venv_mac
 bin/.venv_windows
 bin/dist
