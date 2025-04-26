@@ -29,6 +29,9 @@ services:
     restart: always
     env_file:
       - .env
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD_ADMIN}
+      - POSTGRES_USER=${POSTGRES_USER_ADMIN}
     networks:
       - network_main
     ports:

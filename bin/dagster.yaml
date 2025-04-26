@@ -5,10 +5,10 @@ run_retries:
 storage:
   postgres:
     postgres_db:
-      username: { env: DB_USERNAME }
-      password: { env: DB_PASSWORD }
-      hostname: { env: DB_HOST }
-      db_name: trading_companion
-      port: 5432
+      db_name: { env: POSTGRES_DB }
+      hostname: { env: POSTGRES_HOST }
+      password: { env: POSTGRES_PASSWORD }
+      port: { env: POSTGRES_PORT }
+      username: { env: POSTGRES_USER }
 telemetry:
   enabled: false
