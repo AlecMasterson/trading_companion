@@ -39,3 +39,13 @@ CREATE TABLE market_data.tickers (
 	updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 	CONSTRAINT tickers_pk PRIMARY KEY (ticker)
 );
+
+CREATE TABLE market_data.news (
+	id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	snippet TEXT NOT NULL,
+	timestamp TIMESTAMPTZ NOT NULL,
+	title TEXT NOT NULL,
+	url TEXT NOT NULL,
+	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+	updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
