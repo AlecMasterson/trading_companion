@@ -44,8 +44,9 @@ def _get(base_url: str) -> PolygonResponse:
 
 def _get_results(base_url: str, mapping_func: Callable[[Any], Optional[Any]]) -> List[Any]:
     results: List[Any] = []
+    url: Optional[str] = f"{base_url}"
 
-    while (url := f"{base_url}") is not None:
+    while url is not None:
         response: PolygonResponse = _get(url)
         url: Optional[str] = response.next_url
 
