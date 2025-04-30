@@ -13,7 +13,7 @@ from utils import LOGGER
 from utils.date_util import from_datetime_str, from_timestamp
 from utils.decorators import RateLimit
 from utils.requests_util import exchange
-from typing import Any, Generator, List, Optional
+from typing import Any, Callable, List, Optional
 import os
 import re
 
@@ -27,7 +27,7 @@ __VALID_TICKER_TYPES: List[PolygonTickerType] = [PolygonTickerType.CS, PolygonTi
 KEY_INDEX: int = 0
 
 @RateLimit(limit=(len(__KEYS) * 5), seconds=65)
-def __get(base_url: str) -> PolygonResponse:
+def _get(base_url: str) -> PolygonResponse:
     global KEY_INDEX
 
     url: str = f"{base_url}"
@@ -42,18 +42,20 @@ def __get(base_url: str) -> PolygonResponse:
 
     return PolygonResponse(**response)
 
-def __get_results(base_url: str) -> Generator[List[Any], None, None]:
-    url: Optional[str] = f"{base_url}"
+def _get_results(base_url: str, mapping_func: Callable[[Any], Optional[Any]]) -> List[Any]:
+    results: List[Any] = []
 
-    while url is not None:
-        response: PolygonResponse = __get(url)
+    while (url := f"{base_url}") is not None:
+        response: PolygonResponse = _get(url)
         url: Optional[str] = response.next_url
 
         if response.status == "OK":
-            yield response.results
+            results_opt: List[Optional[Any]] = [mapping_func(item) for item in response.results]
+            results += [result for result in results_opt if result is not None]
         else:
             LOGGER.warning(f"Invalid Status - {response.status}")
-            yield []
+
+    return results
 
 def get_news(date: str) -> List[News]:
     def to_news(entry_raw: Any) -> Optional[News]:
@@ -67,12 +69,7 @@ def get_news(date: str) -> List[News]:
         )
 
     url: str = f"https://api.polygon.io/v2/reference/news?published_utc={date}"
-
-    response: List[Optional[News]] = []
-    for results in __get_results(url):
-        response += [to_news(i) for i in results]
-
-    return [news for news in response if news is not None]
+    return _get_results(url, to_news)
 
 def get_ticker_candle_history(ticker: str, granularity: Granularity, start_date: str, end_date: str) -> List[Candle]:
     def to_candle(entry_raw: Any) -> Candle:
@@ -91,12 +88,7 @@ def get_ticker_candle_history(ticker: str, granularity: Granularity, start_date:
         )
 
     url: str = f"https://api.polygon.io/v2/aggs/ticker/{ticker}/range/1/{__GRANULARITY_POLYGON_MAP[granularity]}/{start_date}/{end_date}?adjusted=true"
-
-    response: List[Candle] = []
-    for results in __get_results(url):
-        response += [to_candle(i) for i in results]
-
-    return response
+    return _get_results(url, to_candle)
 
 def get_tickers() -> List[Ticker]:
     def to_ticker(entry_raw: Any) -> Optional[Ticker]:
@@ -123,9 +115,5 @@ def get_tickers() -> List[Ticker]:
 
     url: str = "https://api.polygon.io/v3/reference/tickers?active=true&market=stocks"
 
-    response: List[Optional[Ticker]] = []
-    for results in __get_results(url):
-        response += [to_ticker(i) for i in results]
-
-    response: List[Ticker] = [ticker for ticker in response if ticker is not None]
+    response: List[Ticker] = _get_results(url, to_ticker)
     return list({getattr(ticker, "ticker"): ticker for ticker in response}.values())
