@@ -3,12 +3,14 @@ from enums.Source import Source
 from enums.TickerType import TickerType
 from enums.polygon.PolygonTickerType import PolygonTickerType
 from models.db.Candle import Candle
+from models.db.News import News
 from models.db.Ticker import Ticker
 from models.polygon.PolygonCandle import PolygonCandle
+from models.polygon.PolygonNews import PolygonNews
 from models.polygon.PolygonResponse import PolygonResponse
 from models.polygon.PolygonTicker import PolygonTicker
 from utils import LOGGER
-from utils.date_util import from_timestamp
+from utils.date_util import from_datetime_str, from_timestamp
 from utils.decorators import RateLimit
 from utils.requests_util import exchange
 from typing import Any, Generator, List, Optional
@@ -52,6 +54,25 @@ def __get_results(base_url: str) -> Generator[List[Any], None, None]:
         else:
             LOGGER.warning(f"Invalid Status - {response.status}")
             yield []
+
+def get_news(date: str) -> List[News]:
+    def to_news(entry_raw: Any) -> Optional[News]:
+        entry: PolygonNews = PolygonNews(**entry_raw)
+
+        return News(
+            snippet=entry.description,
+            timestamp=from_datetime_str(entry.published_utc, "%Y-%m-%dT%H:%M:%SZ"),
+            title=entry.title,
+            url=entry.article_url
+        )
+
+    url: str = f"https://api.polygon.io/v2/reference/news?published_utc={date}"
+
+    response: List[Optional[News]] = []
+    for results in __get_results(url):
+        response += [to_news(i) for i in results]
+
+    return [news for news in response if news is not None]
 
 def get_ticker_candle_history(ticker: str, granularity: Granularity, start_date: str, end_date: str) -> List[Candle]:
     def to_candle(entry_raw: Any) -> Candle:
