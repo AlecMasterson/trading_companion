@@ -59,19 +59,18 @@ def _get_results(path: str, mapping_func: Callable[[Any], Optional[Any]]) -> Lis
 
     return results
 
+def _to_news(entry_raw: Any) -> News:
+    entry: PolygonNews = PolygonNews(**entry_raw)
+
+    return News(
+        snippet=entry.description,
+        timestamp=from_datetime_str(entry.published_utc, "%Y-%m-%dT%H:%M:%SZ"),
+        title=entry.title,
+        url=entry.article_url
+    )
+
 def get_news(date: str) -> List[News]:
-    def to_news(entry_raw: Any) -> Optional[News]:
-        entry: PolygonNews = PolygonNews(**entry_raw)
-
-        return News(
-            snippet=entry.description,
-            timestamp=from_datetime_str(entry.published_utc, "%Y-%m-%dT%H:%M:%SZ"),
-            title=entry.title,
-            url=entry.article_url
-        )
-
-    url: str = f"https://api.polygon.io/v2/reference/news?published_utc={date}"
-    return _get_results(url, to_news)
+    return _get_results(f"/v2/reference/news?published_utc={date}", _to_news)
 
 def get_ticker_candle_history(ticker: str, granularity: Granularity, start_date: str, end_date: str) -> List[Candle]:
     def to_candle(entry_raw: Any) -> Candle:
