@@ -18,28 +18,28 @@ import os
 import re
 
 _BASE_URL = "https://api.polygon.io"
-__GRANULARITY_POLYGON_MAP = {
+_GRANULARITY_POLYGON_MAP = {
     Granularity.HOUR: "hour",
     Granularity.DAY: "day"
 }
-__KEYS: List[str] = [os.environ[key] for key in os.environ if re.compile(r"^POLYGON_KEY_(\d+)$").match(key)]
-__VALID_TICKER_TYPES: List[PolygonTickerType] = [PolygonTickerType.CS, PolygonTickerType.ETF]
+_KEYS: List[str] = [os.environ[key] for key in os.environ if re.compile(r"^POLYGON_KEY_(\d+)$").match(key)]
+_VALID_TICKER_TYPES: List[PolygonTickerType] = [PolygonTickerType.CS, PolygonTickerType.ETF]
 
 KEY_INDEX: int = 0
 
-@RateLimit(limit=(len(__KEYS) * 5), seconds=65)
+@RateLimit(limit=(len(_KEYS) * 5), seconds=65)
 def _get(base_url: str) -> PolygonResponse:
     global KEY_INDEX
 
     url: str = f"{base_url}"
     if "cursor" in url:
         params = {}
-        url += f"&apiKey={__KEYS[KEY_INDEX]}"
+        url += f"&apiKey={_KEYS[KEY_INDEX]}"
     else:
-        params = {"apiKey": __KEYS[KEY_INDEX]}
+        params = {"apiKey": _KEYS[KEY_INDEX]}
 
     response: Any = exchange(url, "GET", params=params)
-    KEY_INDEX = 0 if KEY_INDEX == len(__KEYS) - 1 else KEY_INDEX + 1
+    KEY_INDEX = 0 if KEY_INDEX == len(_KEYS) - 1 else KEY_INDEX + 1
 
     return PolygonResponse(**response)
 
@@ -99,7 +99,7 @@ def get_news(date: str) -> List[News]:
     return _get_results(f"/v2/reference/news?published_utc={date}", _to_news)
 
 def get_ticker_candle_history(ticker: str, granularity: Granularity, start_date: str, end_date: str) -> List[Candle]:
-    granularity_str: str = __GRANULARITY_POLYGON_MAP[granularity]
+    granularity_str: str = _GRANULARITY_POLYGON_MAP[granularity]
     return _get_results(
         f"/v2/aggs/ticker/{ticker}/range/1/{granularity_str}/{start_date}/{end_date}?adjusted=true",
         _to_candle,
