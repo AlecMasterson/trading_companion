@@ -43,7 +43,7 @@ def _get(base_url: str) -> PolygonResponse:
 
     return PolygonResponse(**response)
 
-def _get_results(path: str, mapping_func: Callable[[Any], Optional[Any]]) -> List[Any]:
+def _get_results(path: str, mapping_func: Callable[..., Any], *args: Any) -> List[Any]:
     results: List[Any] = []
     url: Optional[str] = f"{_BASE_URL}{path}"
 
@@ -52,12 +52,26 @@ def _get_results(path: str, mapping_func: Callable[[Any], Optional[Any]]) -> Lis
         url: Optional[str] = response.next_url
 
         if response.status == "OK":
-            results_opt: List[Optional[Any]] = [mapping_func(item) for item in response.results]
-            results += [result for result in results_opt if result is not None]
+            results += [mapping_func(item, *args) for item in response.results]
         else:
             LOGGER.warning(f"Invalid Status - {response.status}")
 
     return results
+
+def _to_candle(entry_raw: Any, ticker: str, granularity: Granularity) -> Candle:
+    entry: PolygonCandle = PolygonCandle(**entry_raw)
+
+    return Candle(
+        close=entry.c,
+        granularity=granularity,
+        high=entry.h,
+        low=entry.l,
+        open=entry.o,
+        source=Source.POLYGON,
+        ticker=ticker,
+        timestamp=from_timestamp(entry.t),
+        volume=entry.v
+    )
 
 def _to_news(entry_raw: Any) -> News:
     entry: PolygonNews = PolygonNews(**entry_raw)
@@ -69,50 +83,30 @@ def _to_news(entry_raw: Any) -> News:
         url=entry.article_url
     )
 
+def _to_ticker(entry_raw: Any) -> Ticker:
+    entry: PolygonTicker = PolygonTicker(**entry_raw)
+
+    ticker_type_polygon: PolygonTickerType = PolygonTickerType(entry.type)
+    ticker_type: TickerType = TickerType(ticker_type_polygon.value)
+
+    return Ticker(
+        name=entry.name,
+        ticker=entry.ticker,
+        type=ticker_type
+    )
+
 def get_news(date: str) -> List[News]:
     return _get_results(f"/v2/reference/news?published_utc={date}", _to_news)
 
 def get_ticker_candle_history(ticker: str, granularity: Granularity, start_date: str, end_date: str) -> List[Candle]:
-    def to_candle(entry_raw: Any) -> Candle:
-        entry: PolygonCandle = PolygonCandle(**entry_raw)
-
-        return Candle(
-            close=entry.c,
-            granularity=granularity,
-            high=entry.h,
-            low=entry.l,
-            open=entry.o,
-            source=Source.POLYGON,
-            ticker=ticker,
-            timestamp=from_timestamp(entry.t),
-            volume=entry.v
-        )
-
     granularity_str: str = __GRANULARITY_POLYGON_MAP[granularity]
-    return _get_results(f"/v2/aggs/ticker/{ticker}/range/1/{granularity_str}/{start_date}/{end_date}?adjusted=true", to_candle)
+    return _get_results(
+        f"/v2/aggs/ticker/{ticker}/range/1/{granularity_str}/{start_date}/{end_date}?adjusted=true",
+        _to_candle,
+        ticker,
+        granularity
+    )
 
 def get_tickers() -> List[Ticker]:
-    def to_ticker(entry_raw: Any) -> Optional[Ticker]:
-        entry: PolygonTicker = PolygonTicker(**entry_raw)
-
-        try:
-            if entry.type is None:
-                return None
-
-            ticker_type_polygon: PolygonTickerType = PolygonTickerType(entry.type)
-            if ticker_type_polygon not in __VALID_TICKER_TYPES:
-                return None
-
-            ticker_type: TickerType = TickerType(ticker_type_polygon.value)
-        except ValueError:
-            LOGGER.warning(f"Invalid TickerType={entry.type}")
-            return None
-
-        return Ticker(
-            name=entry.name,
-            ticker=entry.ticker,
-            type=ticker_type
-        )
-
-    response: List[Ticker] = _get_results("/v3/reference/tickers?active=true&market=stocks", to_ticker)
+    response: List[Ticker] = _get_results("/v3/reference/tickers?active=true&market=stocks", _to_ticker)
     return list({getattr(ticker, "ticker"): ticker for ticker in response}.values())
