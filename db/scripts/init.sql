@@ -44,6 +44,7 @@ CREATE TABLE market_data.tickers (
 CREATE TABLE market_insights.news_articles (
 	url TEXT NOT NULL,
 	snippet TEXT NOT NULL,
+	source VARCHAR(20) NOT NULL,
 	timestamp TIMESTAMPTZ NOT NULL,
 	title TEXT NOT NULL,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),

@@ -76,6 +76,7 @@ def _to_news_article(entry_raw: Any) -> NewsArticle:
 
     return NewsArticle(
         snippet=entry.description,
+        source=Source.POLYGON,
         timestamp=from_datetime_str(entry.published_utc, "%Y-%m-%dT%H:%M:%SZ"),
         title=entry.title,
         url=entry.article_url
