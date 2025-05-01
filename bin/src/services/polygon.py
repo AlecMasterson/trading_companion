@@ -3,7 +3,7 @@ from enums.Source import Source
 from enums.TickerType import TickerType
 from enums.polygon.PolygonTickerType import PolygonTickerType
 from models.db.Candle import Candle
-from models.db.News import News
+from models.db.NewsArticle import NewsArticle
 from models.db.Ticker import Ticker
 from models.polygon.PolygonCandle import PolygonCandle
 from models.polygon.PolygonNews import PolygonNews
@@ -73,10 +73,10 @@ def _to_candle(entry_raw: Any, ticker: str, granularity: Granularity) -> Candle:
         volume=entry.v
     )
 
-def _to_news(entry_raw: Any) -> News:
+def _to_news_article(entry_raw: Any) -> NewsArticle:
     entry: PolygonNews = PolygonNews(**entry_raw)
 
-    return News(
+    return NewsArticle(
         snippet=entry.description,
         timestamp=from_datetime_str(entry.published_utc, "%Y-%m-%dT%H:%M:%SZ"),
         title=entry.title,
@@ -95,8 +95,8 @@ def _to_ticker(entry_raw: Any) -> Ticker:
         type=ticker_type
     )
 
-def get_news(date: str) -> List[News]:
-    return _get_results(f"/v2/reference/news?published_utc={date}", _to_news)
+def get_news_articles(date: str) -> List[NewsArticle]:
+    return _get_results(f"/v2/reference/news?published_utc={date}", _to_news_article)
 
 def get_ticker_candle_history(ticker: str, granularity: Granularity, start_date: str, end_date: str) -> List[Candle]:
     granularity_str: str = _GRANULARITY_POLYGON_MAP[granularity]
