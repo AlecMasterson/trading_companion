@@ -17,6 +17,7 @@ from typing import Any, Callable, List, Optional
 import os
 import re
 
+_BASE_URL = "https://api.polygon.io"
 __GRANULARITY_POLYGON_MAP = {
     Granularity.HOUR: "hour",
     Granularity.DAY: "day"
@@ -42,9 +43,9 @@ def _get(base_url: str) -> PolygonResponse:
 
     return PolygonResponse(**response)
 
-def _get_results(base_url: str, mapping_func: Callable[[Any], Optional[Any]]) -> List[Any]:
+def _get_results(path: str, mapping_func: Callable[[Any], Optional[Any]]) -> List[Any]:
     results: List[Any] = []
-    url: Optional[str] = f"{base_url}"
+    url: Optional[str] = f"{_BASE_URL}{path}"
 
     while url is not None:
         response: PolygonResponse = _get(url)
@@ -88,8 +89,8 @@ def get_ticker_candle_history(ticker: str, granularity: Granularity, start_date:
             volume=entry.v
         )
 
-    url: str = f"https://api.polygon.io/v2/aggs/ticker/{ticker}/range/1/{__GRANULARITY_POLYGON_MAP[granularity]}/{start_date}/{end_date}?adjusted=true"
-    return _get_results(url, to_candle)
+    granularity_str: str = __GRANULARITY_POLYGON_MAP[granularity]
+    return _get_results(f"/v2/aggs/ticker/{ticker}/range/1/{granularity_str}/{start_date}/{end_date}?adjusted=true", to_candle)
 
 def get_tickers() -> List[Ticker]:
     def to_ticker(entry_raw: Any) -> Optional[Ticker]:
@@ -114,7 +115,5 @@ def get_tickers() -> List[Ticker]:
             type=ticker_type
         )
 
-    url: str = "https://api.polygon.io/v3/reference/tickers?active=true&market=stocks"
-
-    response: List[Ticker] = _get_results(url, to_ticker)
+    response: List[Ticker] = _get_results("/v3/reference/tickers?active=true&market=stocks", to_ticker)
     return list({getattr(ticker, "ticker"): ticker for ticker in response}.values())
