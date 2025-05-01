@@ -1,7 +1,6 @@
 from enums.Granularity import Granularity
 from enums.Source import Source
 from enums.TickerType import TickerType
-from enums.polygon.PolygonTickerType import PolygonTickerType
 from models.db.Candle import Candle
 from models.db.NewsArticle import NewsArticle
 from models.db.Ticker import Ticker
@@ -23,7 +22,6 @@ _GRANULARITY_POLYGON_MAP = {
     Granularity.DAY: "day"
 }
 _KEYS: List[str] = [os.environ[key] for key in os.environ if re.compile(r"^POLYGON_KEY_(\d+)$").match(key)]
-_VALID_TICKER_TYPES: List[PolygonTickerType] = [PolygonTickerType.CS, PolygonTickerType.ETF]
 
 KEY_INDEX: int = 0
 
@@ -86,8 +84,10 @@ def _to_news_article(entry_raw: Any) -> NewsArticle:
 def _to_ticker(entry_raw: Any) -> Ticker:
     entry: PolygonTicker = PolygonTicker(**entry_raw)
 
-    ticker_type_polygon: PolygonTickerType = PolygonTickerType(entry.type)
-    ticker_type: TickerType = TickerType(ticker_type_polygon.value)
+    try:
+        ticker_type: TickerType = TickerType(entry.type)
+    except ValueError:
+        ticker_type: TickerType = TickerType.OTHER
 
     return Ticker(
         name=entry.name,
