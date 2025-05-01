@@ -9,7 +9,7 @@ from utils.database import get_database_session
 
 _database_session: Session = next(get_database_session())
 
-def update() -> None:
+def main() -> None:
     tickers: List[Ticker] = get_tickers()
     tickers_dict: List[dict] = [ticker.model_dump() for ticker in tickers if ticker.type != TickerType.OTHER]
     LOGGER.info(f"tickers.length={len(tickers_dict)}")
@@ -18,4 +18,4 @@ def update() -> None:
     _database_session.commit()
 
 if __name__ == "__main__":
-    update()
+    main()

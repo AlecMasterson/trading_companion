@@ -15,18 +15,7 @@ _database_session: Session = next(get_database_session())
 
 def get_tickers() -> List[str]:
     tickers: List[Ticker] = _database_session.exec(select(Ticker)).all()
-    LOGGER.info(f"tickers.length={len(tickers)}")
-
     return [ticker.ticker for ticker in tickers]
-
-def update(tickers: List[str], start_date: str, end_date: str) -> List[str]:
-    failed: List[str] = []
-
-    for ticker in tickers:
-        if not update_ticker(ticker, start_date, end_date):
-            failed.append(ticker)
-
-    return failed
 
 def update_ticker(ticker: str, start_date: str, end_date: str) -> bool:
     try:
@@ -47,11 +36,7 @@ def update_ticker_granularity(ticker: str, granularity: Granularity, start_date:
     _database_session.exec(db_insert(Candle).values(candles_dict).on_conflict_do_nothing())
     _database_session.commit()
 
-if __name__ == "__main__":
-    parser: ArgumentParser = ArgumentParser()
-    parser.add_argument("-d", default=1, type=int)
-    total_days_in_past: int = parser.parse_args().d
-
+def main(total_days_in_past: int) -> None:
     today: datetime = get_now_eastern()
     start_date: str = to_string(today - timedelta(days=total_days_in_past), format="%Y-%m-%d")
     # TODO: Check at 8pm+ on a weekday if this can get todays results without a delayed issue.
@@ -59,5 +44,15 @@ if __name__ == "__main__":
     LOGGER.info(f"start_date={start_date} end_date={end_date}")
 
     tickers: List[str] = get_tickers()
+    LOGGER.info(f"tickers.length={len(tickers)}")
 
-    update(tickers, start_date, end_date)
+    failed: List[str] = [ticker for ticker in tickers if not update_ticker(ticker, start_date, end_date)]
+    if len(failed) > 0:
+        raise Exception(f"failed={failed}")
+
+if __name__ == "__main__":
+    parser: ArgumentParser = ArgumentParser()
+    parser.add_argument("-d", default=1, type=int)
+    total_days_in_past: int = parser.parse_args().d
+
+    main(total_days_in_past)

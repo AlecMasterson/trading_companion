@@ -19,11 +19,14 @@ def update(date: str) -> None:
     _database_session.exec(db_insert(NewsArticle).values(news_articles_dict).on_conflict_do_nothing())
     _database_session.commit()
 
+def main(total_days_in_past: int) -> None:
+    for days_in_past in range(0, total_days_in_past+1):
+        date: str = to_string(get_now_eastern() - timedelta(days=days_in_past), format="%Y-%m-%d")
+        update(date)
+
 if __name__ == "__main__":
     parser: ArgumentParser = ArgumentParser()
     parser.add_argument("-d", default=0, type=int)
     total_days_in_past: int = parser.parse_args().d
 
-    for days_in_past in range(0, total_days_in_past+1):
-        date: str = to_string(get_now_eastern() - timedelta(days=days_in_past), format="%Y-%m-%d")
-        update(date)
+    main(total_days_in_past)
