@@ -6,5 +6,5 @@ source /home/alec/.env
 set +a
 
 sudo docker load -i /home/alec/trading_companion_$VERSION.tar
-sudo docker tag trading_companion_prod:$VERSION trading_companion:$VERSION
+sudo docker tag trading_companion_prod:$VERSION trading_companion:latest
 rm /home/alec/trading_companion_$VERSION.tar
