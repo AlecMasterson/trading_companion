@@ -32,11 +32,14 @@ def update_ticker_granularity(ticker: str, granularity: Granularity, start_date:
     candles: List[Candle] = get_ticker_candle_history(ticker, granularity, start_date, end_date)
     candles_dict: List[dict] = [candle.model_dump() for candle in candles]
     LOGGER.info(f"ticker={ticker} granularity={granularity} candles.length={len(candles_dict)}")
+    if len(candles_dict) == 0:
+        LOGGER.warning(f"ticker={ticker} granularity={granularity} candles.length={len(candles_dict)}")
+        return
 
     _database_session.exec(db_insert(Candle).values(candles_dict).on_conflict_do_nothing())
     _database_session.commit()
 
-def main(total_days_in_past: int) -> None:
+def main(total_days_in_past: int = 1) -> None:
     today: datetime = get_now_eastern()
     start_date: str = to_string(today - timedelta(days=total_days_in_past), format="%Y-%m-%d")
     # TODO: Check at 8pm+ on a weekday if this can get todays results without a delayed issue.

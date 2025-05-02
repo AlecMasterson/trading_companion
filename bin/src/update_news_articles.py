@@ -19,7 +19,7 @@ def update(date: str) -> None:
     _database_session.exec(db_insert(NewsArticle).values(news_articles_dict).on_conflict_do_nothing())
     _database_session.commit()
 
-def main(total_days_in_past: int) -> None:
+def main(total_days_in_past: int = 1) -> None:
     for days_in_past in range(0, total_days_in_past+1):
         date: str = to_string(get_now_eastern() - timedelta(days=days_in_past), format="%Y-%m-%d")
         update(date)
